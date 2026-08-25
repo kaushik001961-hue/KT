@@ -105,7 +105,7 @@ export default function Navbar({
                 }}
               >
                 <Image
-                  src="/images/krupali-traders-logo.png"
+                  src="/images/Krupali-Traders-Logo.png"
                   alt="Krupali Traders Private Limited"
                   fill
                   priority
