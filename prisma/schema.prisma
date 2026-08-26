@@ -92,6 +92,7 @@ model Category {
   slug        String
   type        ProductType
   description String?
+  imageUrl    String?
   active      Boolean     @default(true)
 
   products Product[]

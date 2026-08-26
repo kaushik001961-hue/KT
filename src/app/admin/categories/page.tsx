@@ -17,6 +17,7 @@ type ProductCategory = {
   slug: string;
   type: ProductType;
   description: string | null;
+  imageUrl: string | null;
   active: boolean;
   _count: {
     products: number;
@@ -28,6 +29,7 @@ type BlogCategory = {
   name: string;
   slug: string;
   description: string | null;
+  imageUrl: string | null;
   active: boolean;
   _count?: {
     posts?: number;
@@ -39,6 +41,7 @@ const emptyProductForm = {
   name: "",
   type: "IMPORT" as ProductType,
   description: "",
+  imageUrl: "",
   active: true,
 };
 
@@ -46,6 +49,7 @@ const emptyBlogForm = {
   name: "",
   slug: "",
   description: "",
+  imageUrl: "",
   active: true,
 };
 
@@ -77,6 +81,12 @@ export default function CategoriesPage() {
 
   const [productForm, setProductForm] =
     useState(emptyProductForm);
+
+  const [categoryImageFile, setCategoryImageFile] =
+    useState<File | null>(null);
+
+  const [categoryImagePreview, setCategoryImagePreview] =
+    useState<string>("");
 
   const [blogForm, setBlogForm] =
     useState(emptyBlogForm);
@@ -138,6 +148,39 @@ export default function CategoriesPage() {
     loadCategories();
   }, []);
 
+  function resetCategoryImage() {
+    setCategoryImageFile(null);
+    setCategoryImagePreview("");
+  }
+
+  function handleCategoryImageChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0] || null;
+
+    if (!file) {
+      setCategoryImageFile(null);
+      setCategoryImagePreview(productForm.imageUrl || "");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Category image must be 10 MB or smaller.");
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+    setCategoryImageFile(file);
+    setCategoryImagePreview(URL.createObjectURL(file));
+  }
+
   function openAddProductForm(type: ProductType) {
     setEditingId(null);
 
@@ -145,6 +188,7 @@ export default function CategoriesPage() {
       ...emptyProductForm,
       type,
     });
+    resetCategoryImage();
 
     setError("");
     setSuccess("");
@@ -160,8 +204,11 @@ export default function CategoriesPage() {
       name: category.name,
       type: category.type,
       description: category.description || "",
+      imageUrl: category.imageUrl || "",
       active: category.active,
     });
+    setCategoryImageFile(null);
+    setCategoryImagePreview(category.imageUrl || "");
 
     setError("");
     setSuccess("");
@@ -186,8 +233,11 @@ export default function CategoriesPage() {
       name: category.name,
       slug: category.slug,
       description: category.description || "",
+      imageUrl: category.imageUrl || "",
       active: category.active,
     });
+    setCategoryImageFile(null);
+    setCategoryImagePreview(category.imageUrl || "");
 
     setError("");
     setSuccess("");
@@ -204,6 +254,7 @@ export default function CategoriesPage() {
     setEditingBlogId(null);
 
     setProductForm(emptyProductForm);
+    resetCategoryImage();
     setBlogForm(emptyBlogForm);
   }
 
@@ -223,6 +274,33 @@ export default function CategoriesPage() {
     setSaving(true);
 
     try {
+      let imageUrl = productForm.imageUrl || null;
+
+      if (categoryImageFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", categoryImageFile);
+        uploadForm.append("type", productForm.type);
+
+        const uploadResponse = await fetch(
+          "/api/admin/categories/upload-image",
+          {
+            method: "POST",
+            body: uploadForm,
+          }
+        );
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(
+            uploadResult.message ||
+              "Unable to upload category image."
+          );
+        }
+
+        imageUrl = uploadResult.imageUrl || null;
+      }
+
       const response = await fetch(
         editingId
           ? `/api/admin/categories/${editingId}`
@@ -237,6 +315,7 @@ export default function CategoriesPage() {
             type: productForm.type,
             description:
               productForm.description.trim() || null,
+            imageUrl,
             active: productForm.active,
           }),
         }
@@ -260,6 +339,7 @@ export default function CategoriesPage() {
       setShowProductForm(false);
       setEditingId(null);
       setProductForm(emptyProductForm);
+      resetCategoryImage();
 
       await loadCategories();
     } catch (err) {
@@ -606,6 +686,9 @@ export default function CategoriesPage() {
                     Category
                   </th>
                   <th className="px-4 py-3 text-xs font-black uppercase tracking-wider text-[var(--foreground)]/40">
+                    Image
+                  </th>
+                  <th className="px-4 py-3 text-xs font-black uppercase tracking-wider text-[var(--foreground)]/40">
                     Slug
                   </th>
                   <th className="px-4 py-3 text-xs font-black uppercase tracking-wider text-[var(--foreground)]/40">
@@ -634,6 +717,20 @@ export default function CategoriesPage() {
                       {category.description && (
                         <div className="mt-1 max-w-xs truncate text-xs text-[var(--foreground)]/45">
                           {category.description}
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      {category.imageUrl ? (
+                        <img
+                          src={category.imageUrl}
+                          alt={category.name}
+                          className="h-14 w-20 rounded-xl object-cover border border-[var(--border)]"
+                        />
+                      ) : (
+                        <div className="flex h-14 w-20 items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-soft)] text-[10px] font-bold uppercase text-[var(--foreground)]/35">
+                          No Image
                         </div>
                       )}
                     </td>
@@ -929,7 +1026,7 @@ export default function CategoriesPage() {
               items={exportCategories}
             />
 
-            {/* BLOG CATEGORY — SAME FUNCTION, PINK THEME */}
+            {/* BLOG CATEGORY â€” SAME FUNCTION, PINK THEME */}
             <BlogCategoryList />
           </div>
         )}
@@ -1032,6 +1129,39 @@ export default function CategoriesPage() {
                 />
               </div>
 
+              <div>
+                <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
+                  Category Image
+                </label>
+
+                <div className="rounded-2xl border border-dashed border-blue-500/30 bg-[var(--surface-soft)] p-4">
+                  {categoryImagePreview ? (
+                    <div className="mb-4 overflow-hidden rounded-2xl border border-[var(--border)]">
+                      <img
+                        src={categoryImagePreview}
+                        alt="Category preview"
+                        className="h-44 w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mb-4 flex h-36 items-center justify-center rounded-2xl bg-blue-500/5 text-sm font-semibold text-[var(--foreground)]/40">
+                      No category image selected
+                    </div>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    onChange={handleCategoryImageChange}
+                    className="block w-full cursor-pointer text-sm text-[var(--foreground)]/70 file:mr-4 file:rounded-full file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-blue-700"
+                  />
+
+                  <p className="mt-2 text-xs text-[var(--foreground)]/45">
+                    JPG, PNG, WEBP or AVIF. Maximum 10 MB.
+                  </p>
+                </div>
+              </div>
+
               <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4">
                 <input
                   type="checkbox"
@@ -1084,7 +1214,7 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* BLOG CATEGORY MODAL — PINK */}
+      {/* BLOG CATEGORY MODAL â€” PINK */}
 
       {showBlogForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
