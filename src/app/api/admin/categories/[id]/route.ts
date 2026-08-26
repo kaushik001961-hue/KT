@@ -32,17 +32,27 @@ export async function PUT(
 
   try {
     const { id } = await context.params;
+
     const body = await request.json();
 
+    console.log("CATEGORY UPDATE BODY:", body);
+
     const name = String(body.name || "").trim();
+
     const type = body.type;
+
     const description =
       String(body.description || "").trim() || null;
+
+    const imageUrl =
+      String(body.imageUrl || "").trim() || null;
 
     const active =
       typeof body.active === "boolean"
         ? body.active
         : true;
+
+    console.log("CATEGORY IMAGE URL:", imageUrl);
 
     if (!name) {
       return NextResponse.json(
@@ -59,6 +69,13 @@ export async function PUT(
     }
 
     const slug = slugify(name);
+
+    if (!slug) {
+      return NextResponse.json(
+        { message: "Invalid category name." },
+        { status: 400 }
+      );
+    }
 
     const existing = await prisma.category.findFirst({
       where: {
@@ -89,9 +106,12 @@ export async function PUT(
         slug,
         type,
         description,
+        imageUrl,
         active,
       },
     });
+
+    console.log("CATEGORY UPDATED:", category);
 
     return NextResponse.json({
       success: true,
@@ -101,7 +121,9 @@ export async function PUT(
     console.error("CATEGORY_UPDATE_ERROR", error);
 
     return NextResponse.json(
-      { message: "Unable to update category." },
+      {
+        message: "Unable to update category.",
+      },
       { status: 500 }
     );
   }
@@ -143,10 +165,6 @@ export async function DELETE(
       );
     }
 
-    /*
-     * Don't physically delete a category that is already
-     * being used by products. Deactivate it instead.
-     */
     if (category._count.products > 0) {
       const updated = await prisma.category.update({
         where: {
@@ -181,7 +199,9 @@ export async function DELETE(
     console.error("CATEGORY_DELETE_ERROR", error);
 
     return NextResponse.json(
-      { message: "Unable to delete category." },
+      {
+        message: "Unable to delete category.",
+      },
       { status: 500 }
     );
   }
