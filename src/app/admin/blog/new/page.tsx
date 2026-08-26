@@ -9,14 +9,14 @@ import {
   FileText,
   Image as ImageIcon,
   Loader2,
-  Upload,
-  Trash2,
   Save,
   Send,
   Tag,
+  Upload,
   XCircle,
 } from "lucide-react";
 import {
+  ChangeEvent,
   FormEvent,
   useEffect,
   useMemo,
@@ -89,14 +89,14 @@ export default function NewBlogArticlePage() {
   const [saving, setSaving] =
     useState(false);
 
-  const [uploadingImage, setUploadingImage] =
-    useState(false);
-
   const [error, setError] =
     useState("");
 
   const [success, setSuccess] =
     useState("");
+
+  const [uploadingImage, setUploadingImage] =
+    useState(false);
 
   const [slugEdited, setSlugEdited] =
     useState(false);
@@ -160,10 +160,17 @@ export default function NewBlogArticlePage() {
           );
         }
 
-        setCategories(
-          categoryResult.categories ||
-            []
-        );
+        const activeCategories = (
+          categoryResult.categories || []
+        ).filter((category) => category.active);
+
+        setCategories(activeCategories);
+
+        if (activeCategories.length === 0) {
+          throw new Error(
+            "No active Blog Categories are available. Create a Blog Category first."
+          );
+        }
 
         if (
           !importProductResponse.ok ||
@@ -188,10 +195,28 @@ export default function NewBlogArticlePage() {
         const exportProductResult =
           (await exportProductResponse.json()) as ProductResponse;
 
-        setProducts([
+        const availableProducts = [
           ...(importProductResult.products || []),
           ...(exportProductResult.products || []),
-        ]);
+        ].filter(
+          (product) => product.status === "PUBLISHED"
+        );
+
+        if (availableProducts.length === 0) {
+          throw new Error(
+            "No published Import or Export products are available."
+          );
+        }
+
+        setProducts(availableProducts);
+
+        setForm((current) => ({
+          ...current,
+          categoryId:
+            current.categoryId || activeCategories[0].id,
+          productId:
+            current.productId || availableProducts[0].id,
+        }));
       } catch (err) {
         setError(
           err instanceof Error
@@ -214,6 +239,80 @@ export default function NewBlogArticlePage() {
       ...current,
       [field]: value,
     }));
+  }
+
+  async function handleImageUpload(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Please select a JPG, PNG, WEBP or GIF image.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image size must be 10 MB or less.");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setError("");
+      setSuccess("");
+
+      const data = new FormData();
+      data.append("file", file);
+
+      const response = await fetch(
+        "/api/admin/blog/upload-image",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const result = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+        url?: string;
+        secure_url?: string;
+      };
+
+      if (!response.ok || !(result.url || result.secure_url)) {
+        throw new Error(
+          result.message ||
+            "Unable to upload the featured image."
+        );
+      }
+
+      updateField(
+        "featuredImage",
+        result.url || result.secure_url || ""
+      );
+
+      setSuccess("Featured image uploaded successfully.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to upload the featured image."
+      );
+    } finally {
+      setUploadingImage(false);
+      event.target.value = "";
+    }
   }
 
   function handleTitleChange(
@@ -256,84 +355,6 @@ export default function NewBlogArticlePage() {
       );
     }, [contentWordCount]);
 
-  async function handleImageUpload(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    setError("");
-    setSuccess("");
-
-    if (!file.type.startsWith("image/")) {
-      setError("Please select a valid image file.");
-      event.target.value = "";
-      return;
-    }
-
-    const maxSize = 10 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      setError("Image size must be 10 MB or smaller.");
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setUploadingImage(true);
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(
-        "/api/admin/blog/upload-image",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.message ||
-            "Unable to upload image."
-        );
-      }
-
-      updateField(
-        "featuredImage",
-        result.url || ""
-      );
-
-      if (!form.imageAlt.trim()) {
-        updateField(
-          "imageAlt",
-          file.name
-            .replace(/\.[^/.]+$/, "")
-            .replace(/[-_]+/g, " ")
-        );
-      }
-
-      setSuccess(
-        "Featured image uploaded successfully."
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to upload image."
-      );
-    } finally {
-      setUploadingImage(false);
-      event.target.value = "";
-    }
-  }
-
   async function saveArticle(
     status: BlogStatus
   ) {
@@ -361,10 +382,18 @@ export default function NewBlogArticlePage() {
       return;
     }
 
+    if (!form.categoryId) {
+      setError("Please select a Blog Category.");
+      return;
+    }
+
+    if (!form.productId) {
+      setError("Please select a related Import or Export product.");
+      return;
+    }
+
     if (!form.featuredImage.trim()) {
-      setError(
-        "Featured image is required. Please upload an image from your PC or enter an image URL."
-      );
+      setError("Featured image is required. Please upload an image from your PC.");
       return;
     }
 
@@ -754,93 +783,46 @@ export default function NewBlogArticlePage() {
 
               <div className="space-y-5">
 
-                <div className="rounded-2xl border border-dashed border-blue-500/30 bg-blue-500/5 p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-black text-[var(--foreground)]">
-                        Upload from your PC
-                        <span className="ml-1 text-red-500">*</span>
-                      </p>
-
-                      <p className="mt-1 text-xs text-[var(--muted)]">
-                        JPG, PNG, WEBP or GIF • Maximum 10 MB
-                      </p>
-                    </div>
-
+                <Field
+                  label="Featured Image"
+                  required
+                  hint="Upload JPG, PNG, WEBP or GIF from your PC. Max 10 MB."
+                >
+                  <div className="space-y-3">
                     <label
-                      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 ${
-                        uploadingImage
-                          ? "pointer-events-none opacity-60"
-                          : ""
+                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-cyan-500/40 bg-cyan-500/5 px-4 py-5 text-sm font-bold text-cyan-600 transition hover:bg-cyan-500/10 dark:text-cyan-400 ${
+                        uploadingImage ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
                       {uploadingImage ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        <Upload className="h-4 w-4" />
+                        <Upload className="h-5 w-5" />
                       )}
 
                       {uploadingImage
-                        ? "Uploading..."
-                        : "Choose Image"}
+                        ? "Uploading image..."
+                        : "Choose Image From PC"}
 
                       <input
                         type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
+                        accept="image/jpeg,image/png,image/webp,image/gif"
                         className="hidden"
                         disabled={uploadingImage}
+                        onChange={handleImageUpload}
                       />
                     </label>
-                  </div>
-                </div>
 
-                <Field
-                  label="Featured Image URL"
-                  hint="Optional alternative: paste a publicly accessible image URL."
-                >
-                  <input
-                    value={
-                      form.featuredImage
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "featuredImage",
-                        event.target.value
-                      )
-                    }
-                    placeholder="https://..."
-                    className="input"
-                  />
+                    <input
+                      type="hidden"
+                      value={form.featuredImage}
+                      readOnly
+                    />
+                  </div>
                 </Field>
 
                 {form.featuredImage && (
-                  <div className="overflow-hidden rounded-2xl border border-emerald-500/25 bg-[var(--background)]">
-                    <div className="flex items-center justify-between border-b border-emerald-500/15 bg-emerald-500/5 px-4 py-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-emerald-600">
-                          Image Ready
-                        </p>
-
-                        <p className="mt-1 max-w-[420px] truncate text-[11px] text-[var(--muted)]">
-                          {form.featuredImage}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateField(
-                            "featuredImage",
-                            ""
-                          )
-                        }
-                        className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-500 hover:text-white"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Remove
-                      </button>
-                    </div>
+                  <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
 
                     <img
                       src={
@@ -853,6 +835,7 @@ export default function NewBlogArticlePage() {
                       }
                       className="max-h-[360px] w-full object-cover"
                     />
+
                   </div>
                 )}
 
@@ -1006,6 +989,7 @@ export default function NewBlogArticlePage() {
 
                 <Field
                   label="Category"
+                  required
                   hint="Choose the main topic."
                 >
                   <select
@@ -1047,7 +1031,8 @@ export default function NewBlogArticlePage() {
 
                 <Field
                   label="Related Product"
-                  hint="Optional product CTA on the article."
+                  required
+                  hint="Select an available Import or Export product."
                 >
                   <select
                     value={
@@ -1068,8 +1053,7 @@ export default function NewBlogArticlePage() {
                       {products
                         .filter(
                           (product) =>
-                            product.type === "IMPORT" &&
-                            product.status === "PUBLISHED"
+                            product.type === "IMPORT"
                         )
                         .map(
                           (product) => (
@@ -1087,8 +1071,7 @@ export default function NewBlogArticlePage() {
                       {products
                         .filter(
                           (product) =>
-                            product.type === "EXPORT" &&
-                            product.status === "PUBLISHED"
+                            product.type === "EXPORT"
                         )
                         .map(
                           (product) => (
@@ -1241,7 +1224,16 @@ export default function NewBlogArticlePage() {
                 />
 
                 <ChecklistItem
-                  label="Featured image (required)"
+                  label="Related product"
+                  complete={
+                    Boolean(
+                      form.productId
+                    )
+                  }
+                />
+
+                <ChecklistItem
+                  label="Featured image"
                   complete={
                     Boolean(
                       form.featuredImage.trim()

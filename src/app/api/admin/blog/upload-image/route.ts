@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
+import crypto from "crypto";
 
 import { getAdminSession } from "@/lib/admin-auth";
 
-export const runtime = "nodejs";
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
@@ -14,167 +12,178 @@ const ALLOWED_TYPES = new Set([
   "image/gif",
 ]);
 
-function configureCloudinary() {
-  const cloudName =
-    process.env.CLOUDINARY_CLOUD_NAME;
-
-  const apiKey =
-    process.env.CLOUDINARY_API_KEY;
-
-  const apiSecret =
-    process.env.CLOUDINARY_API_SECRET;
-
-  if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error(
-      "Cloudinary configuration is missing. Please check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET."
-    );
-  }
-
-  cloudinary.config({
-    cloud_name: cloudName,
-    api_key: apiKey,
-    api_secret: apiSecret,
-  });
-}
-
-function uploadToCloudinary(
-  buffer: Buffer
-): Promise<{
-  secure_url: string;
-  public_id: string;
-}> {
-  return new Promise(
-    (resolve, reject) => {
-      const uploadStream =
-        cloudinary.uploader.upload_stream(
-          {
-            folder:
-              "krupali-traders/blog",
-            resource_type: "image",
-          },
-          (error, result) => {
-            if (error || !result) {
-              reject(
-                error ||
-                  new Error(
-                    "Cloudinary upload failed."
-                  )
-              );
-              return;
-            }
-
-            resolve({
-              secure_url:
-                result.secure_url,
-              public_id:
-                result.public_id,
-            });
-          }
-        );
-
-      uploadStream.end(buffer);
-    }
-  );
-}
-
-export async function POST(
-  request: Request
+function cloudinarySignature(
+  params: Record<string, string>,
+  apiSecret: string
 ) {
+  const payload = Object.entries(params)
+    .filter(([, value]) => value !== "")
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+
+  return crypto
+    .createHash("sha1")
+    .update(payload + apiSecret)
+    .digest("hex");
+}
+
+export async function POST(request: Request) {
   try {
-    const admin =
-      await getAdminSession();
+    const admin = await getAdminSession();
 
     if (!admin) {
       return NextResponse.json(
         {
           success: false,
-          message: "Unauthorized",
+          message: "Authentication required.",
         },
         { status: 401 }
       );
     }
 
-    configureCloudinary();
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    const formData =
-      await request.formData();
-
-    const file =
-      formData.get("file");
-
-    if (!(file instanceof File)) {
+    if (!cloudName || !apiKey || !apiSecret) {
       return NextResponse.json(
         {
           success: false,
           message:
-            "Please select an image file.",
+            "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in Vercel.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const formData = await request.formData();
+    const value = formData.get("file");
+
+    if (!(value instanceof File)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Please select an image file.",
         },
         { status: 400 }
       );
     }
 
-    if (!ALLOWED_TYPES.has(file.type)) {
+    if (!ALLOWED_TYPES.has(value.type)) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Only JPG, PNG, WEBP and GIF images are allowed.",
+          message: "Only JPG, PNG, WEBP and GIF images are allowed.",
         },
         { status: 400 }
       );
     }
 
-    if (file.size <= 0) {
+    if (value.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "The selected image is empty.",
+          message: "Image size must be 4 MB or less.",
         },
         { status: 400 }
       );
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const folder = "krupali-traders/blog";
+
+    const signature = cloudinarySignature(
+      {
+        folder,
+        timestamp,
+      },
+      apiSecret
+    );
+
+    const uploadForm = new FormData();
+
+    uploadForm.append(
+      "file",
+      new Blob([await value.arrayBuffer()], {
+        type: value.type,
+      }),
+      value.name
+    );
+    uploadForm.append("api_key", apiKey);
+    uploadForm.append("timestamp", timestamp);
+    uploadForm.append("folder", folder);
+    uploadForm.append("signature", signature);
+
+    const cloudinaryResponse = await fetch(
+      `https://api.cloudinary.com/v1_1/${encodeURIComponent(
+        cloudName
+      )}/image/upload`,
+      {
+        method: "POST",
+        body: uploadForm,
+      }
+    );
+
+    const responseText = await cloudinaryResponse.text();
+
+    let uploadResult: {
+      secure_url?: string;
+      public_id?: string;
+      error?: {
+        message?: string;
+      };
+    };
+
+    try {
+      uploadResult = JSON.parse(responseText);
+    } catch {
+      console.error(
+        "CLOUDINARY BLOG IMAGE INVALID RESPONSE:",
+        responseText
+      );
+
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Image size must be 10 MB or smaller.",
+          message: "Cloudinary returned an invalid response.",
         },
-        { status: 400 }
+        { status: 502 }
       );
     }
 
-    const arrayBuffer =
-      await file.arrayBuffer();
+    if (!cloudinaryResponse.ok || !uploadResult.secure_url) {
+      const message =
+        uploadResult.error?.message ||
+        `Cloudinary HTTP ${cloudinaryResponse.status}`;
 
-    const buffer =
-      Buffer.from(arrayBuffer);
+      console.error("CLOUDINARY BLOG IMAGE UPLOAD ERROR:", {
+        status: cloudinaryResponse.status,
+        message,
+      });
 
-    const uploaded =
-      await uploadToCloudinary(
-        buffer
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Cloudinary upload failed: ${message}`,
+        },
+        { status: 502 }
       );
+    }
 
     return NextResponse.json({
       success: true,
-      url: uploaded.secure_url,
-      publicId: uploaded.public_id,
+      message: "Featured image uploaded successfully.",
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id ?? null,
     });
   } catch (error) {
-    console.error(
-      "BLOG_IMAGE_UPLOAD_ERROR",
-      error
-    );
+    console.error("BLOG IMAGE UPLOAD ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unable to upload Blog image.",
+        message: "Unable to upload the featured image.",
       },
       { status: 500 }
     );
