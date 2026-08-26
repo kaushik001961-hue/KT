@@ -513,15 +513,15 @@ export default function Navbar({
                   />
                 </motion.div>
 
-                <div className="min-w-0">
-                  <div className="text-sm font-bold tracking-tight text-[var(--foreground)] sm:text-lg">
-                    KRUPALI
-                  </div>
+               <div className="min-w-0">
+  <div className="text-sm font-bold tracking-tight text-[var(--foreground)] sm:text-lg">
+    KRUPALI
+  </div>
 
-                  <div className="-mt-0.5 hidden whitespace-nowrap text-[9px] font-semibold tracking-[0.10em] text-[#c9a24d] sm:block sm:text-[10px] lg:text-[11px]">
-                    TRADERS PRIVATE LIMITED
-                  </div>
-                </div>
+  <div className="-mt-0.5 whitespace-nowrap text-[7px] font-semibold tracking-[0.06em] text-[#c9a24d] sm:text-[10px] sm:tracking-[0.10em] lg:text-[11px]">
+    TRADERS PRIVATE LIMITED
+  </div>
+</div>
               </Link>
 
               {/* =================================================
