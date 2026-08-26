@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Globe2,
@@ -45,7 +46,12 @@ type Product = {
   images: ProductImage[];
 };
 
-export default function ExportProductsPage() {
+function ExportProductsContent() {
+  const searchParams = useSearchParams();
+
+  const categoryId =
+    searchParams.get("categoryId")?.trim() || "";
+
   const [products, setProducts] =
     useState<Product[]>([]);
 
@@ -63,14 +69,21 @@ export default function ExportProductsPage() {
         setLoading(true);
         setError("");
 
-        const response =
-          await fetch(
-            "/api/products?type=EXPORT",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
+        const query = new URLSearchParams();
+
+        query.set("type", "EXPORT");
+
+        if (categoryId) {
+          query.set("categoryId", categoryId);
+        }
+
+        const response = await fetch(
+          `/api/products?${query.toString()}`,
+          {
+            method: "GET",
+            cache: "no-store",
+          }
+        );
 
         if (!response.ok) {
           throw new Error(
@@ -115,7 +128,7 @@ export default function ExportProductsPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [categoryId]);
 
   return (
     <main className="gradient-section overflow-hidden">
@@ -210,7 +223,6 @@ export default function ExportProductsPage() {
                     <div className="aspect-[4/3] animate-pulse bg-[var(--primary-light)]" />
 
                     <div className="space-y-4 p-7">
-
                       <div className="h-3 w-24 animate-pulse rounded bg-[var(--primary-light)]" />
 
                       <div className="h-7 w-40 animate-pulse rounded bg-[var(--primary-light)]" />
@@ -218,7 +230,6 @@ export default function ExportProductsPage() {
                       <div className="h-16 animate-pulse rounded bg-[var(--primary-light)]" />
 
                       <div className="h-12 animate-pulse rounded-full bg-[var(--primary-light)]" />
-
                     </div>
                   </div>
                 )
@@ -233,12 +244,14 @@ export default function ExportProductsPage() {
             !error &&
             products.length > 0 && (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                   />
                 ))}
+
               </div>
             )}
 
@@ -250,22 +263,24 @@ export default function ExportProductsPage() {
               <div className="mx-auto max-w-2xl rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-10 text-center shadow-sm sm:p-14">
 
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+
                   <Globe2
                     size={30}
                     className="text-[#1455a0] dark:text-[#68b0ff]"
                   />
+
                 </div>
 
                 <h2 className="mt-6 text-2xl font-bold text-[var(--foreground)]">
-                  No export products available
+                  {categoryId
+                    ? "Currently no product available for this category"
+                    : "No export products available"}
                 </h2>
 
                 <p className="mt-3 leading-7 text-[var(--foreground)]/60">
-                  Our export product catalogue is
-                  currently being updated. Please
-                  check again soon or contact our team
-                  to discuss international market
-                  opportunities.
+                  {categoryId
+                    ? "There are currently no published products available in this category. Please check again soon or contact our team."
+                    : "Our export product catalogue is currently being updated. Please check again soon or contact our team to discuss international market opportunities."}
                 </p>
 
                 <Link
@@ -333,10 +348,12 @@ export default function ExportProductsPage() {
                 <div className="gradient-card gradient-border rounded-3xl p-6">
 
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+
                     <Globe2
                       size={24}
                       className="text-[#1455a0] dark:text-[#68b0ff]"
                     />
+
                   </div>
 
                   <h3 className="mt-5 font-bold text-[var(--foreground)]">
@@ -354,10 +371,12 @@ export default function ExportProductsPage() {
                 <div className="gradient-card gradient-border rounded-3xl p-6">
 
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+
                     <PackageCheck
                       size={24}
                       className="text-[#1455a0] dark:text-[#68b0ff]"
                     />
+
                   </div>
 
                   <h3 className="mt-5 font-bold text-[var(--foreground)]">
@@ -425,5 +444,27 @@ export default function ExportProductsPage() {
       </section>
 
     </main>
+  );
+}
+
+export default function ExportProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="gradient-section min-h-screen px-5 pb-24 pt-32 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="mx-auto h-5 w-40 animate-pulse rounded-full bg-[var(--primary-light)]" />
+
+              <div className="mx-auto mt-6 h-14 max-w-2xl animate-pulse rounded-xl bg-[var(--primary-light)]" />
+
+              <div className="mx-auto mt-5 h-6 max-w-xl animate-pulse rounded-lg bg-[var(--primary-light)]" />
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <ExportProductsContent />
+    </Suspense>
   );
 }
