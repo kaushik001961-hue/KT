@@ -297,7 +297,7 @@ export default async function ProductDetailPage({
                   Request a Quote
                 </a>
 
-               <ShareProductButton
+              <ShareProductButton
   name={product.name}
   type={product.type}
   category={product.category?.name}
@@ -306,7 +306,9 @@ export default async function ProductDetailPage({
   specifications={product.specifications}
   countryOfOrigin={product.countryOfOrigin}
   packaging={product.packaging}
-  minimumOrderQuantity={product.minimumOrderQuantity}
+  minimumOrderQuantity={
+    product.minimumOrderQuantity
+  }
   slug={product.slug}
   images={product.images}
 />
