@@ -377,7 +377,7 @@ export default function Footer() {
                   />
 
                   <span>
-                    +91 XXXXX XXXXX
+                    +91 96010 90109
                   </span>
 
                 </div>
@@ -390,7 +390,7 @@ export default function Footer() {
                   />
 
                   <span>
-                    info@krupalitraders.com
+                    krupalitraderss@gmail.com
                   </span>
 
                 </div>

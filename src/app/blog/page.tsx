@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowLeft,
   ArrowRight,
   CalendarDays,
   Clock3,
@@ -13,9 +14,12 @@ import { prisma } from "@/lib/prisma";
 type SearchParams = Promise<{
   q?: string;
   category?: string;
+  page?: string;
 }>;
 
 export const dynamic = "force-dynamic";
+
+const POSTS_PER_PAGE = 7;
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -64,6 +68,14 @@ export default async function BlogPage({
       ? params.category.trim()
       : "";
 
+  const pageParam =
+    typeof params.page === "string"
+      ? parseInt(params.page, 10)
+      : 1;
+
+  const currentPage =
+    isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+
   const categories =
     await prisma.blogCategory.findMany({
       where: {
@@ -94,44 +106,49 @@ export default async function BlogPage({
         )
       : null;
 
+  const whereClause = {
+    status: "PUBLISHED" as const,
+    ...(query
+      ? {
+          OR: [
+            {
+              title: {
+                contains: query,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              excerpt: {
+                contains: query,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              content: {
+                contains: query,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        }
+      : {}),
+    ...(selectedCategory
+      ? {
+          categoryId: selectedCategory.id,
+        }
+      : {}),
+  };
+
+  const totalPostsCount =
+    await prisma.blogPost.count({
+      where: whereClause,
+    });
+
+  const skip = (currentPage - 1) * POSTS_PER_PAGE;
+
   const posts =
     await prisma.blogPost.findMany({
-      where: {
-        status: "PUBLISHED",
-
-        ...(query
-          ? {
-              OR: [
-                {
-                  title: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  excerpt: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  content: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }
-          : {}),
-
-        ...(selectedCategory
-          ? {
-              categoryId:
-                selectedCategory.id,
-            }
-          : {}),
-      },
-
+      where: whereClause,
       orderBy: [
         {
           publishedAt: "desc",
@@ -140,68 +157,78 @@ export default async function BlogPage({
           createdAt: "desc",
         },
       ],
-
+      skip,
+      take: POSTS_PER_PAGE,
       include: {
         category: true,
         product: true,
       },
     });
 
-  const featuredPost =
-    !query && !selectedCategory
-      ? posts[0] || null
-      : null;
+  const showFeatured = currentPage === 1 && !query && !selectedCategory;
+  const featuredPost = showFeatured ? posts[0] || null : null;
+  const remainingPosts = featuredPost ? posts.slice(1) : posts;
 
-  const remainingPosts =
-    featuredPost
-      ? posts.slice(1)
-      : posts;
+  const totalPages = Math.ceil(totalPostsCount / POSTS_PER_PAGE);
+
+  const createPaginationUrl = (targetPage: number) => {
+    const searchParamsObj = new URLSearchParams();
+    if (query) searchParamsObj.set("q", query);
+    if (categorySlug) searchParamsObj.set("category", categorySlug);
+    if (targetPage > 1) searchParamsObj.set("page", targetPage.toString());
+    const queryString = searchParamsObj.toString();
+    return `/blog${queryString ? `?${queryString}` : ""}`;
+  };
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <main className="relative min-h-screen bg-transparent text-[var(--foreground)] overflow-hidden">
+
+      {/* =====================================================
+          FULL-SCREEN BACKGROUND VIDEO (Fully Transparent)
+      ===================================================== */}
+      <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover opacity-30"
+        >
+          <source src="/videos/blog-bg.mp4" type="video/mp4" />
+        </video>
+      </div>
 
       {/* =====================================================
           HERO
       ===================================================== */}
 
-      <section className="relative overflow-hidden px-4 pb-12 pt-32 sm:px-6 sm:pb-16 sm:pt-36 lg:px-8">
-
-        <div className="pointer-events-none absolute -right-32 top-20 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
-
-        <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
+      <section className="relative z-10 overflow-hidden px-4 pb-12 pt-32 sm:px-6 sm:pb-16 sm:pt-36 lg:px-8">
 
         <div className="relative mx-auto max-w-7xl">
 
          <div className="mx-auto max-w-4xl text-center">
 
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-blue-400 backdrop-blur-sm">
               <FileText className="h-4 w-4" />
               Krupali Traders Blog
             </div>
 
-            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-              Trade Insights,
-              <span className="block text-[#1455a0]">
-                Market Knowledge & Updates
-              </span>
-            </h1>
-
-           <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-[var(--foreground)]/65 sm:text-lg">
+           <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-[var(--foreground)]/80 sm:text-lg">
               Explore practical insights about international
               trade, import and export, products, sourcing,
               packaging, logistics and global markets.
             </p>
 
-          </div>
+         </div>
 
           {/* =================================================
               SEARCH
           ================================================= */}
 
          <form
-  action="/blog"
-  className="mx-auto mt-8 max-w-2xl"
->
+           action="/blog"
+           className="mx-auto mt-8 max-w-2xl"
+         >
             {categorySlug && (
               <input
                 type="hidden"
@@ -210,7 +237,7 @@ export default async function BlogPage({
               />
             )}
 
-            <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-lg shadow-blue-950/5">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-transparent p-2 shadow-lg backdrop-blur-sm">
 
               <Search className="ml-3 h-5 w-5 shrink-0 text-[var(--muted)]" />
 
@@ -238,7 +265,7 @@ export default async function BlogPage({
           CATEGORIES
       ===================================================== */}
 
-      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+      <section className="relative z-10 px-4 pb-8 sm:px-6 lg:px-8">
 
         <div className="mx-auto max-w-7xl">
 
@@ -246,10 +273,10 @@ export default async function BlogPage({
 
             <Link
               href="/blog"
-              className={`rounded-full border px-4 py-2 text-xs font-black transition ${
+              className={`rounded-full border px-4 py-2 text-xs font-black transition backdrop-blur-sm ${
                 !categorySlug
                   ? "border-[#1455a0] bg-[#1455a0] text-white"
-                  : "border-[var(--border)] bg-[var(--surface)] hover:border-[#1455a0]/40 hover:text-[#1455a0]"
+                  : "border-white/15 bg-transparent hover:border-[#1455a0]/40 hover:text-[#1455a0]"
               }`}
             >
               All Articles
@@ -268,11 +295,11 @@ export default async function BlogPage({
                         )}`
                       : ""
                   }`}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black transition ${
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black transition backdrop-blur-sm ${
                     categorySlug ===
                     category.slug
                       ? "border-[#1455a0] bg-[#1455a0] text-white"
-                      : "border-[var(--border)] bg-[var(--surface)] hover:border-[#1455a0]/40 hover:text-[#1455a0]"
+                      : "border-white/15 bg-transparent hover:border-[#1455a0]/40 hover:text-[#1455a0]"
                   }`}
                 >
                   {category.name}
@@ -293,7 +320,7 @@ export default async function BlogPage({
           CONTENT
       ===================================================== */}
 
-      <section className="px-4 pb-20 sm:px-6 lg:px-8">
+      <section className="relative z-10 px-4 pb-20 sm:px-6 lg:px-8">
 
         <div className="mx-auto max-w-7xl">
 
@@ -321,8 +348,8 @@ export default async function BlogPage({
               </div>
 
               <p className="text-sm text-[var(--muted)]">
-                {posts.length}{" "}
-                {posts.length === 1
+                {totalPostsCount}{" "}
+                {totalPostsCount === 1
                   ? "article"
                   : "articles"}
               </p>
@@ -337,7 +364,7 @@ export default async function BlogPage({
           {featuredPost && (
             <Link
               href={`/blog/${featuredPost.slug}`}
-              className="group mb-10 block overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-xl shadow-blue-950/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
+              className="group mb-10 block overflow-hidden rounded-[2rem] border border-white/15 bg-transparent shadow-xl backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
             >
 
               <div className="grid lg:grid-cols-2">
@@ -391,7 +418,7 @@ export default async function BlogPage({
                   </h2>
 
                   {featuredPost.excerpt && (
-                    <p className="mt-5 line-clamp-4 text-sm leading-7 text-[var(--foreground)]/65 sm:text-base">
+                    <p className="mt-5 line-clamp-4 text-sm leading-7 text-[var(--foreground)]/75 sm:text-base">
                       {
                         featuredPost.excerpt
                       }
@@ -427,10 +454,10 @@ export default async function BlogPage({
               ARTICLES GRID
           ================================================= */}
 
-          {remainingPosts.length > 0 ? (
+          {posts.length > 0 ? (
             <div>
 
-              {!featuredPost && (
+              {!featuredPost && !query && !categorySlug && (
                 <div className="mb-7 flex items-end justify-between">
 
                   <div>
@@ -444,9 +471,8 @@ export default async function BlogPage({
                   </div>
 
                   <p className="text-sm text-[var(--muted)]">
-                    {remainingPosts.length}{" "}
-                    {remainingPosts.length ===
-                    1
+                    {totalPostsCount}{" "}
+                    {totalPostsCount === 1
                       ? "article"
                       : "articles"}
                   </p>
@@ -467,6 +493,63 @@ export default async function BlogPage({
 
               </div>
 
+              {/* =================================================
+                  PAGINATION CONTROLS
+              ================================================= */}
+
+              {totalPages > 1 && (
+                <div className="mt-12 flex items-center justify-center gap-3">
+                  {currentPage > 1 ? (
+                    <Link
+                      href={createPaginationUrl(currentPage - 1)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-transparent px-4 py-2.5 text-xs font-black backdrop-blur-sm transition hover:border-[#1455a0]/40 hover:text-[#1455a0]"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Previous
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-xs font-black opacity-40 cursor-not-allowed backdrop-blur-sm">
+                      <ArrowLeft className="h-4 w-4" />
+                      Previous
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => {
+                      const isCurrent = pageNumber === currentPage;
+                      return (
+                        <Link
+                          key={pageNumber}
+                          href={createPaginationUrl(pageNumber)}
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl text-xs font-black backdrop-blur-sm transition ${
+                            isCurrent
+                              ? "bg-[#1455a0] text-white shadow-md shadow-blue-950/10"
+                              : "border border-white/15 bg-transparent hover:border-[#1455a0]/40 hover:text-[#1455a0]"
+                          }`}
+                        >
+                          {pageNumber}
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  {currentPage < totalPages ? (
+                    <Link
+                      href={createPaginationUrl(currentPage + 1)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-transparent px-4 py-2.5 text-xs font-black backdrop-blur-sm transition hover:border-[#1455a0]/40 hover:text-[#1455a0]"
+                    >
+                      Next
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-xs font-black opacity-40 cursor-not-allowed backdrop-blur-sm">
+                      Next
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  )}
+                </div>
+              )}
+
             </div>
           ) : (
             <EmptyState
@@ -486,7 +569,7 @@ export default async function BlogPage({
 }
 
 /* ============================================================
-   ARTICLE CARD
+    ARTICLE CARD
 ============================================================ */
 
 function ArticleCard({
@@ -514,7 +597,7 @@ function ArticleCard({
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-lg shadow-blue-950/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/15 bg-transparent shadow-lg backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
 
       <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-blue-950 to-[#1455a0]">
@@ -555,7 +638,7 @@ function ArticleCard({
         </h3>
 
         {post.excerpt && (
-          <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--foreground)]/60">
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--foreground)]/70">
             {post.excerpt}
           </p>
         )}
@@ -573,7 +656,7 @@ function ArticleCard({
             }
           />
 
-          <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-4">
+          <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
 
             <span className="text-xs font-black text-[#1455a0]">
               Read More
@@ -592,7 +675,7 @@ function ArticleCard({
 }
 
 /* ============================================================
-   ARTICLE META
+    ARTICLE META
 ============================================================ */
 
 function ArticleMeta({
@@ -628,7 +711,7 @@ function ArticleMeta({
 }
 
 /* ============================================================
-   EMPTY STATE
+    EMPTY STATE
 ============================================================ */
 
 function EmptyState({
@@ -639,9 +722,9 @@ function EmptyState({
   category?: string;
 }) {
   return (
-    <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] px-6 py-16 text-center shadow-lg shadow-blue-950/5">
+    <div className="rounded-[2rem] border border-white/15 bg-transparent px-6 py-16 text-center shadow-lg backdrop-blur-sm">
 
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
         <Search className="h-8 w-8" />
       </div>
 
