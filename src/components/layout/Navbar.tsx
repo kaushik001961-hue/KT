@@ -457,7 +457,7 @@ export default function Navbar({
               className="relative h-64 w-64 overflow-hidden rounded-full bg-white shadow-2xl shadow-[#1455a0]/20 sm:h-72 sm:w-72"
             >
               <Image
-                src="/images/Krupali-Traders-Logo.png"
+                src="/images/Krupali-Traders-Logo.gif"
                 alt="Krupali Traders Private Limited"
                 fill
                 priority
@@ -504,7 +504,7 @@ export default function Navbar({
                   }}
                 >
                   <Image
-                    src="/images/Krupali-Traders-Logo.png"
+                    src="/images/Krupali-Traders-Logo.gif"
                     alt="Krupali Traders Private Limited"
                     fill
                     priority

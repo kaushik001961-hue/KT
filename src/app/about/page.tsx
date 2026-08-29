@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,44 +11,77 @@ export default function AboutPage() {
   return (
     <main className="gradient-section">
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
+ {/* =====================================================
+    FULL-SCREEN VIDEO HERO
+===================================================== */}
+<section className="relative min-h-screen w-full overflow-hidden">
 
-      <section className="relative overflow-hidden px-5 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:px-8 lg:pt-32">
+  {/* Background Video */}
+  <video
+    className="absolute inset-0 h-full w-full object-cover"
+    autoPlay
+    muted
+    loop
+    playsInline
+    preload="auto"
+    poster="/images/about-hero-poster.jpg"
+    aria-hidden="true"
+  >
+    <source
+      src="/videos/krupali-trade.mp4"
+      type="video/mp4"
+    />
+  </video>
 
-        <div className="mx-auto max-w-5xl text-center">
+  {/* Bottom Content */}
+  <div className="absolute inset-x-0 bottom-0 z-10">
 
-          <div className="text-sm font-bold uppercase tracking-[0.2em] text-[#c9a24d] dark:text-[#d8b45b]">
-            About Us
-          </div>
+    <div className="mx-auto max-w-7xl px-5 pb-10 text-center sm:px-8 sm:pb-14 lg:pb-16">
 
-          <h1 className="mx-auto mt-4 max-w-5xl text-4xl font-bold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-6xl">
-            <span className="gradient-text">
-              Connecting markets. Creating opportunities.
-            </span>
-          </h1>
+      <div className="text-sm font-bold uppercase tracking-[0.25em] text-[#d8b45b]">
+        About Krupali Traders
+      </div>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--foreground)]/65">
-            Krupali Traders Private Limited is focused on creating
-            dependable connections between quality products and
-            international markets.
-          </p>
+      <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white sm:text-lg sm:leading-8">
+        Krupali Traders Private Limited is focused on creating
+        dependable connections between quality products and
+        international markets.
+      </p>
 
-        </div>
-      </section>
+      <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+
+        <Link
+          href="/contact"
+          className="inline-flex items-center gap-2 rounded-full bg-[#d8b45b] px-7 py-3 font-semibold text-[#07111f] transition hover:-translate-y-1 hover:bg-[#e6c66f] hover:shadow-xl"
+        >
+          Work With Us
+          <ArrowRight size={17} />
+        </Link>
+
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-transparent px-7 py-3 font-semibold text-white transition hover:-translate-y-1 hover:bg-white/10"
+        >
+          Explore Products
+        </Link>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
       {/* =====================================================
           CORE VALUES
       ===================================================== */}
-
-      <section className="px-5 pb-24 lg:px-8">
+      <section className="px-5 pb-24 pt-16 lg:px-8">
         <div className="mx-auto max-w-7xl">
 
           <div className="grid gap-6 md:grid-cols-3">
 
             {/* GLOBAL APPROACH */}
-
             <div className="gradient-card gradient-border rounded-3xl p-6 sm:p-8">
 
               <Globe2
@@ -67,7 +101,6 @@ export default function AboutPage() {
             </div>
 
             {/* TRUSTED TRADE */}
-
             <div className="gradient-card gradient-border rounded-3xl p-6 sm:p-8">
 
               <ShieldCheck
@@ -86,7 +119,6 @@ export default function AboutPage() {
             </div>
 
             {/* QUALITY FOCUS */}
-
             <div className="gradient-card gradient-border rounded-3xl p-6 sm:p-8">
 
               <Target
@@ -109,7 +141,6 @@ export default function AboutPage() {
           {/* =================================================
               OUR APPROACH
           ================================================= */}
-
           <div className="mt-8 rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#07111f] via-[#0b3266] to-[#1455a0] p-8 text-white shadow-[0_25px_70px_rgba(20,85,160,0.15)] lg:p-12">
 
             <div className="max-w-3xl">
