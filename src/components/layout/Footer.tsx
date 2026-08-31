@@ -362,7 +362,8 @@ export default function Footer() {
                   />
 
                   <span>
-                    Gujarat,
+                    207, 2nd Floor, White House Complex, 
+                    Sector 11, Gandhinagar, Gujarat -382010.
                     <br />
                     India
                   </span>

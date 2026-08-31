@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Menu,
   X,
@@ -17,7 +20,7 @@ import {
 import { useTheme } from "./ThemeProvider";
 
 /* =========================================================
-   TYPES
+    TYPES
 ========================================================= */
 
 type NavbarProps = {
@@ -43,34 +46,24 @@ type Category = {
 };
 
 /* =========================================================
-   COMPONENT
+    COMPONENT
 ========================================================= */
 
-export default function Navbar({
-  isAdmin = false,
-}: NavbarProps) {
+export default function Navbar({ isAdmin = false }: NavbarProps) {
+  const pathname = usePathname();
+  const t = useTranslations("Navbar");
+
+  const currentLocale = pathname.split("/")[1] || "en";
+
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const [productsOpen, setProductsOpen] = useState(false);
-
-  const [exportCategoriesOpen, setExportCategoriesOpen] =
-    useState(false);
-
-  const [importCategoriesOpen, setImportCategoriesOpen] =
-    useState(false);
-
+  const [exportCategoriesOpen, setExportCategoriesOpen] = useState(false);
+  const [importCategoriesOpen, setImportCategoriesOpen] = useState(false);
   const [showLogoIntro, setShowLogoIntro] = useState(true);
-
   const [categories, setCategories] = useState<Category[]>([]);
-
-  const [categoriesLoading, setCategoriesLoading] =
-    useState(true);
-
-  const [openCategoryId, setOpenCategoryId] =
-    useState<string | null>(null);
-
-  const [mobileOpenCategoryId, setMobileOpenCategoryId] =
-    useState<string | null>(null);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
+  const [mobileOpenCategoryId, setMobileOpenCategoryId] = useState<string | null>(null);
 
   const { theme, toggleTheme } = useTheme();
 
@@ -97,49 +90,26 @@ export default function Navbar({
       try {
         setCategoriesLoading(true);
 
-        /*
-         * IMPORTANT:
-         *
-         * This is the PUBLIC category API.
-         *
-         * Do NOT use:
-         *
-         * /api/admin/categories
-         *
-         * because the Navbar is visible to public visitors.
-         */
-
         const response = await fetch("/api/categories", {
           method: "GET",
           cache: "no-store",
         });
 
         if (!response.ok) {
-          throw new Error(
-            "Unable to load product categories."
-          );
+          throw new Error("Unable to load product categories.");
         }
 
         const data = await response.json();
 
-        if (
-          !data.success ||
-          !Array.isArray(data.categories)
-        ) {
-          throw new Error(
-            "Invalid category response."
-          );
+        if (!data.success || !Array.isArray(data.categories)) {
+          throw new Error("Invalid category response.");
         }
 
         if (!cancelled) {
           setCategories(data.categories);
         }
       } catch (error) {
-        console.error(
-          "NAVBAR_CATEGORY_LOAD_ERROR",
-          error
-        );
-
+        console.error("NAVBAR_CATEGORY_LOAD_ERROR", error);
         if (!cancelled) {
           setCategories([]);
         }
@@ -231,7 +201,7 @@ export default function Navbar({
               : "px-3 py-2 text-xs text-[var(--foreground)]/45"
           }
         >
-          Currently no product available
+          {t("noProductsAvailable")}
         </div>
       );
     }
@@ -241,7 +211,7 @@ export default function Navbar({
         {products.map((product) => (
           <Link
             key={product.id}
-            href={`/products/${product.type.toLowerCase()}/${encodeURIComponent(
+            href={`/${currentLocale}/products/${product.type.toLowerCase()}/${encodeURIComponent(
               product.slug
             )}`}
             onClick={mobile ? closeMobile : undefined}
@@ -268,7 +238,7 @@ export default function Navbar({
     if (categoryList.length === 0) {
       return (
         <div className="px-3 py-2 text-xs text-[var(--foreground)]/45">
-          No categories available.
+          {t("noCategories")}
         </div>
       );
     }
@@ -282,16 +252,10 @@ export default function Navbar({
         }`}
       >
         {categoryList.map((category) => (
-          <div
-            key={category.id}
-            className="rounded-lg"
-          >
+          <div key={category.id} className="rounded-lg">
             <div className="flex items-center">
-
-              {/* CATEGORY */}
-
               <Link
-                href={`/products/${category.type.toLowerCase()}?categoryId=${encodeURIComponent(
+                href={`/${currentLocale}/products/${category.type.toLowerCase()}?categoryId=${encodeURIComponent(
                   category.id
                 )}`}
                 className="flex-1 rounded-lg px-3 py-2.5 text-sm text-[var(--foreground)]/70 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
@@ -299,13 +263,9 @@ export default function Navbar({
                 {category.name}
               </Link>
 
-              {/* PRODUCT TOGGLE */}
-
               <button
                 type="button"
-                onClick={() =>
-                  toggleCategory(category.id)
-                }
+                onClick={() => toggleCategory(category.id)}
                 className={`mr-1 flex h-8 w-8 items-center justify-center rounded-full transition ${
                   accent === "blue"
                     ? "text-[#1455a0] hover:bg-[#1455a0]/10 dark:text-[#68b0ff]"
@@ -316,15 +276,11 @@ export default function Navbar({
                 <ChevronDown
                   size={15}
                   className={`transition-transform ${
-                    openCategoryId === category.id
-                      ? "rotate-180"
-                      : ""
+                    openCategoryId === category.id ? "rotate-180" : ""
                   }`}
                 />
               </button>
             </div>
-
-            {/* PRODUCTS */}
 
             {openCategoryId === category.id && (
               <CategoryProducts category={category} />
@@ -349,7 +305,7 @@ export default function Navbar({
     if (categoryList.length === 0) {
       return (
         <div className="px-4 py-2 text-xs text-[var(--foreground)]/45">
-          No categories available.
+          {t("noCategories")}
         </div>
       );
     }
@@ -364,13 +320,9 @@ export default function Navbar({
       >
         {categoryList.map((category) => (
           <div key={category.id}>
-
             <div className="flex items-center">
-
-              {/* CATEGORY */}
-
               <Link
-                href={`/products/${category.type.toLowerCase()}?categoryId=${encodeURIComponent(
+                href={`/${currentLocale}/products/${category.type.toLowerCase()}?categoryId=${encodeURIComponent(
                   category.id
                 )}`}
                 onClick={closeMobile}
@@ -379,13 +331,9 @@ export default function Navbar({
                 {category.name}
               </Link>
 
-              {/* PRODUCT TOGGLE */}
-
               <button
                 type="button"
-                onClick={() =>
-                  toggleMobileCategory(category.id)
-                }
+                onClick={() => toggleMobileCategory(category.id)}
                 className={`mr-1 flex h-8 w-8 items-center justify-center rounded-full ${
                   accent === "blue"
                     ? "text-[#1455a0] dark:text-[#68b0ff]"
@@ -396,21 +344,14 @@ export default function Navbar({
                 <ChevronDown
                   size={15}
                   className={`transition-transform ${
-                    mobileOpenCategoryId === category.id
-                      ? "rotate-180"
-                      : ""
+                    mobileOpenCategoryId === category.id ? "rotate-180" : ""
                   }`}
                 />
               </button>
             </div>
 
-            {/* PRODUCTS */}
-
             {mobileOpenCategoryId === category.id && (
-              <CategoryProducts
-                category={category}
-                mobile
-              />
+              <CategoryProducts category={category} mobile />
             )}
           </div>
         ))}
@@ -424,11 +365,6 @@ export default function Navbar({
 
   return (
     <LayoutGroup>
-
-      {/* =====================================================
-          LOGO INTRO
-      ===================================================== */}
-
       <AnimatePresence>
         {showLogoIntro && (
           <motion.div
@@ -442,14 +378,8 @@ export default function Navbar({
           >
             <motion.div
               layoutId="krupali-brand-logo"
-              initial={{
-                scale: 1.45,
-                opacity: 0,
-              }}
-              animate={{
-                scale: 1,
-                opacity: 1,
-              }}
+              initial={{ scale: 1.45, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
@@ -461,6 +391,7 @@ export default function Navbar({
                 alt="Krupali Traders Private Limited"
                 fill
                 priority
+                unoptimized
                 className="object-cover"
                 sizes="288px"
               />
@@ -469,33 +400,18 @@ export default function Navbar({
         )}
       </AnimatePresence>
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
-      <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-4 sm:pt-3 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-
-          <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)]/90 shadow-[0_10px_40px_rgba(20,55,100,0.12)] backdrop-blur-xl">
-
-            {/* =================================================
-                MAIN NAVBAR
-            ================================================= */}
-
-            <div className="flex h-16 items-center justify-between gap-2 px-3 sm:h-[68px] sm:px-5 lg:px-7">
-
-              {/* =================================================
-                  LOGO
-              ================================================= */}
-
+      <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-6 sm:pt-4">
+        <div className="mx-auto max-w-[96rem]">
+          <div className="rounded-[2.5rem] border border-[var(--border)] bg-[var(--surface)]/95 shadow-[0_10px_40px_rgba(20,55,100,0.12)] backdrop-blur-xl">
+            <div className="flex h-20 items-center justify-between gap-4 px-5 sm:h-22 sm:px-9 lg:px-12">
               <Link
-                href="/"
+                href={`/${currentLocale}`}
                 onClick={closeMobile}
-                className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3.5"
+                className="flex shrink-0 items-center gap-3.5 sm:gap-4.5"
               >
                 <motion.div
                   layoutId="krupali-brand-logo"
-                  className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white shadow-lg shadow-[#1455a0]/20 sm:h-14 sm:w-14"
+                  className="relative h-13 w-13 shrink-0 overflow-hidden rounded-full bg-white shadow-lg shadow-[#1455a0]/20 sm:h-15 sm:w-15"
                   transition={{
                     layout: {
                       duration: 0.9,
@@ -508,243 +424,153 @@ export default function Navbar({
                     alt="Krupali Traders Private Limited"
                     fill
                     priority
+                    unoptimized
                     className="object-cover"
-                    sizes="56px"
+                    sizes="60px"
                   />
                 </motion.div>
 
-               <div className="min-w-0">
-  <div className="text-sm font-bold tracking-tight text-[var(--foreground)] sm:text-lg">
-    KRUPALI
-  </div>
-
-  <div className="-mt-0.5 whitespace-nowrap text-[7px] font-semibold tracking-[0.06em] text-[#c9a24d] sm:text-[10px] sm:tracking-[0.10em] lg:text-[11px]">
-    TRADERS PRIVATE LIMITED
-  </div>
+               {/* Example update inside your Navbar component */}
+<div className="flex flex-col">
+  <span className="font-extrabold tracking-wider text-[var(--foreground)] text-lg">
+    KRUPALI TRADERS
+  </span>
+  <span className="font-semibold tracking-widest text-[#c9a24d] text-sm sm:text-base">
+    PRIVATE LIMITED
+  </span>
 </div>
               </Link>
 
-              {/* =================================================
-                  DESKTOP NAV
-              ================================================= */}
-
-              <nav className="hidden items-center gap-3 lg:flex xl:gap-5">
-
+              <nav className="hidden items-center gap-1.5 lg:flex xl:gap-3">
                 <Link
-                  href="/"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-[var(--foreground)]/75 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                  href={`/${currentLocale}`}
+                  className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                 >
-                  Home
+                  {t("home")}
                 </Link>
 
                 <Link
-                  href="/about"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-[var(--foreground)]/75 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                  href={`/${currentLocale}/about`}
+                  className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                 >
-                  About Us
+                  {t("about")}
                 </Link>
-
-                {/* =================================================
-                    PRODUCTS
-                ================================================= */}
 
                 <div
                   className="relative"
-                  onMouseEnter={() =>
-                    setProductsOpen(true)
-                  }
-                  onMouseLeave={() =>
-                    closeProducts()
-                  }
+                  onMouseEnter={() => setProductsOpen(true)}
+                  onMouseLeave={() => closeProducts()}
                 >
                   <button
                     type="button"
-                    onClick={() =>
-                      setProductsOpen(
-                        (current) => !current
-                      )
-                    }
-                    className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                    onClick={() => setProductsOpen((current) => !current)}
+                    className="flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                   >
-                    Products
-
+                    {t("products")}
                     <ChevronDown
-                      size={15}
+                      size={16}
                       className={`transition-transform ${
-                        productsOpen
-                          ? "rotate-180"
-                          : ""
+                        productsOpen ? "rotate-180" : ""
                       }`}
                     />
                   </button>
 
-                  {/* =================================================
-                      PRODUCTS DROPDOWN
-                  ================================================= */}
-
                   <AnimatePresence>
                     {productsOpen && (
                       <motion.div
-                        initial={{
-                          opacity: 0,
-                          y: 8,
-                          scale: 0.98,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                          scale: 1,
-                        }}
-                        exit={{
-                          opacity: 0,
-                          y: 8,
-                          scale: 0.98,
-                        }}
-                        transition={{
-                          duration: 0.18,
-                        }}
-                        className="absolute left-1/2 top-full w-[270px] -translate-x-1/2 pt-3"
+                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                        transition={{ duration: 0.18 }}
+                        className="absolute left-1/2 top-full w-[290px] -translate-x-1/2 pt-3"
                       >
                         <div className="max-h-[80vh] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-2xl">
-
-                          {/* =================================================
-                              VIEW ALL PRODUCTS
-                          ================================================= */}
-
                           <Link
-                            href="/products"
+                            href={`/${currentLocale}/products`}
                             className="mb-2 flex items-center justify-between rounded-xl bg-[var(--primary-light)] px-4 py-3 transition hover:bg-[var(--primary)] hover:text-white"
                           >
                             <div>
-                              <div className="font-semibold">
-                                All Products
-                              </div>
-
+                              <div className="font-semibold">{t("allProducts")}</div>
                               <div className="mt-0.5 text-xs opacity-60">
-                                Browse all Import & Export Products
+                                {t("browseAllProducts")}
                               </div>
                             </div>
-
                             <ArrowUpRight size={18} />
                           </Link>
 
-                          {/* =================================================
-                              EXPORT
-                          ================================================= */}
-
                           <div className="rounded-xl">
-
                             <div className="flex items-center justify-between rounded-xl p-4 transition hover:bg-[var(--primary-light)]">
-
                               <Link
-                                href="/products/export"
+                                href={`/${currentLocale}/products/export`}
                                 className="min-w-0 flex-1"
                               >
                                 <div className="font-semibold text-[var(--foreground)]">
-                                  Export Products
+                                  {t("exportProducts")}
                                 </div>
-
                                 <div className="mt-1 text-xs text-[var(--foreground)]/55">
-                                  Products supplied to global markets
+                                  {t("exportDesc")}
                                 </div>
                               </Link>
-
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setExportCategoriesOpen(
-                                    (current) =>
-                                      !current
-                                  )
+                                  setExportCategoriesOpen((current) => !current)
                                 }
                                 className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-lg font-medium text-[#1455a0] transition hover:bg-[#1455a0] hover:text-white dark:text-[#68b0ff]"
                               >
-                                {exportCategoriesOpen
-                                  ? "−"
-                                  : "+"}
+                                {exportCategoriesOpen ? "−" : "+"}
                               </button>
-
                             </div>
-
                             {exportCategoriesOpen && (
                               <DesktopCategoryList
-                                categoryList={
-                                  exportCategories
-                                }
+                                categoryList={exportCategories}
                                 accent="blue"
                               />
                             )}
                           </div>
 
-                          {/* =================================================
-                              IMPORT
-                          ================================================= */}
-
                           <div className="mt-1 rounded-xl">
-
                             <div className="flex items-center justify-between rounded-xl p-4 transition hover:bg-[var(--primary-light)]">
-
                               <Link
-                                href="/products/import"
+                                href={`/${currentLocale}/products/import`}
                                 className="min-w-0 flex-1"
                               >
                                 <div className="font-semibold text-[var(--foreground)]">
-                                  Import Products
+                                  {t("importProducts")}
                                 </div>
-
                                 <div className="mt-1 text-xs text-[var(--foreground)]/55">
-                                  Products sourced internationally
+                                  {t("importDesc")}
                                 </div>
                               </Link>
-
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setImportCategoriesOpen(
-                                    (current) =>
-                                      !current
-                                  )
+                                  setImportCategoriesOpen((current) => !current)
                                 }
                                 className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-lg font-medium text-[#c9a24d] transition hover:bg-[#c9a24d] hover:text-white dark:text-[#d8b45b]"
                               >
-                                {importCategoriesOpen
-                                  ? "−"
-                                  : "+"}
+                                {importCategoriesOpen ? "−" : "+"}
                               </button>
-
                             </div>
-
                             {importCategoriesOpen && (
                               <DesktopCategoryList
-                                categoryList={
-                                  importCategories
-                                }
+                                categoryList={importCategories}
                                 accent="gold"
                               />
                             )}
                           </div>
 
-                          {/* =================================================
-                              LOADING
-                          ================================================= */}
-
                           {categoriesLoading && (
                             <div className="px-4 py-3 text-xs text-[var(--foreground)]/45">
-                              Loading product categories...
+                              {t("loadingCategories")}
                             </div>
                           )}
 
-                          {/* =================================================
-                              EMPTY
-                          ================================================= */}
-
-                          {!categoriesLoading &&
-                            categories.length === 0 && (
-                              <div className="px-4 py-3 text-xs text-[var(--foreground)]/45">
-                                No product categories available.
-                              </div>
-                            )}
-
+                          {!categoriesLoading && categories.length === 0 && (
+                            <div className="px-4 py-3 text-xs text-[var(--foreground)]/45">
+                              {t("noCategories")}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -752,340 +578,216 @@ export default function Navbar({
                 </div>
 
                 <Link
-                  href="/gallery"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-[var(--foreground)]/75 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                  href={`/${currentLocale}/gallery`}
+                  className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                 >
-                  Gallery
+                  {t("gallery")}
                 </Link>
 
                 <Link
-                  href="/blog"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-[var(--foreground)]/75 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                  href={`/${currentLocale}/blog`}
+                  className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                 >
-                  Blog
+                  {t("blog")}
                 </Link>
 
                 <Link
-                  href="/contact"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-[var(--foreground)]/75 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
+                  href={`/${currentLocale}/contact`}
+                  className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--foreground)]/80 transition hover:bg-[var(--primary-light)] hover:text-[var(--primary)]"
                 >
-                  Contact
+                  {t("contact")}
                 </Link>
-
               </nav>
 
-              {/* =================================================
-                  RIGHT CONTROLS
-              ================================================= */}
-
-              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-
-                {/* THEME */}
+              <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5">
+               
 
                 <button
                   type="button"
                   onClick={toggleTheme}
                   aria-label="Toggle light and dark mode"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--primary)] transition hover:bg-[var(--primary-light)] sm:h-10 sm:w-10"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--primary)] transition hover:bg-[var(--primary-light)]"
                 >
-                  {theme === "light" ? (
-                    <Moon size={18} />
-                  ) : (
-                    <Sun size={18} />
-                  )}
+                  {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
                 </button>
-
-                {/* ADMIN DASHBOARD */}
 
                 {isAdmin && (
                   <Link
-                    href="/admin/dashboard"
+                    href={`/${currentLocale}/admin/dashboard`}
                     className="hidden items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 text-sm font-bold text-blue-600 transition hover:bg-blue-600 hover:text-white lg:flex"
                   >
                     <LayoutDashboard size={16} />
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
                 )}
 
-                {/* GET A QUOTE */}
-
                 <Link
-                  href="/contact"
-                  className="gradient-button hidden items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white lg:flex"
+                  href={`/${currentLocale}/contact`}
+                  className="gradient-button hidden items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition duration-300 hover:brightness-110 lg:flex"
                 >
-                  Get a Quote
+                  {t("getQuote")}
                   <ArrowUpRight size={16} />
                 </Link>
 
-                {/* MOBILE MENU */}
-
                 <button
                   type="button"
-                  onClick={() =>
-                    setMobileOpen(
-                      (current) => !current
-                    )
-                  }
+                  onClick={() => setMobileOpen((current) => !current)}
                   aria-label="Toggle menu"
                   aria-expanded={mobileOpen}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] lg:hidden sm:h-10 sm:w-10"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] lg:hidden"
                 >
-                  {mobileOpen ? (
-                    <X size={21} />
-                  ) : (
-                    <Menu size={21} />
-                  )}
+                  {mobileOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
-
               </div>
             </div>
-
-            {/* =====================================================
-                MOBILE MENU
-            ===================================================== */}
 
             <AnimatePresence initial={false}>
               {mobileOpen && (
                 <motion.div
-                  initial={{
-                    height: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    height: "auto",
-                    opacity: 1,
-                  }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                  }}
-                  transition={{
-                    duration: 0.25,
-                  }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
                   className="overflow-hidden lg:hidden"
                 >
-                  <div className="border-t border-[var(--border)] px-4 pb-5 pt-3">
-
+                  <div className="border-t border-[var(--border)] px-4 pb-6 pt-4">
                     <nav className="flex flex-col gap-1">
-
-                      {/* HOME */}
-
                       <Link
-                        href="/"
+                        href={`/${currentLocale}`}
                         onClick={closeMobile}
                         className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                       >
-                        Home
+                        {t("home")}
                       </Link>
 
-                      {/* ABOUT */}
-
                       <Link
-                        href="/about"
+                        href={`/${currentLocale}/about`}
                         onClick={closeMobile}
                         className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                       >
-                        About Us
+                        {t("about")}
                       </Link>
-
-                      {/* =================================================
-                          PRODUCTS
-                      ================================================= */}
 
                       <div>
-
                         <button
                           type="button"
-                          onClick={() =>
-                            setProductsOpen(
-                              (current) => !current
-                            )
-                          }
+                          onClick={() => setProductsOpen((current) => !current)}
                           className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                         >
-                          Products
-
+                          {t("products")}
                           <ChevronDown
                             size={18}
                             className={`transition-transform ${
-                              productsOpen
-                                ? "rotate-180"
-                                : ""
+                              productsOpen ? "rotate-180" : ""
                             }`}
                           />
                         </button>
 
                         {productsOpen && (
                           <div className="ml-4 border-l border-[var(--border)] pl-3">
-
-                            {/* ALL PRODUCTS */}
-
                             <Link
-                              href="/products"
+                              href={`/${currentLocale}/products`}
                               onClick={closeMobile}
                               className="mb-1 block rounded-xl bg-[var(--primary-light)] px-4 py-3 font-semibold text-[var(--foreground)]"
                             >
-                              All Products
+                              {t("allProducts")}
                             </Link>
 
-                            {/* =================================================
-                                EXPORT
-                            ================================================= */}
-
                             <div>
-
                               <div className="flex items-center">
-
                                 <Link
-                                  href="/products/export"
+                                  href={`/${currentLocale}/products/export`}
                                   onClick={closeMobile}
                                   className="flex-1 rounded-xl px-4 py-3 font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                                 >
-                                  Export Products
+                                  {t("exportProducts")}
                                 </Link>
-
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    setExportCategoriesOpen(
-                                      (current) =>
-                                        !current
-                                    )
+                                    setExportCategoriesOpen((current) => !current)
                                   }
-                                  className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-lg text-[#1455a0] dark:text-[#68b0ff]"
+                                  className="mr-1 flex h-8 w-8 items-center justify-center rounded-full text-[#1455a0] dark:text-[#68b0ff]"
                                 >
-                                  {exportCategoriesOpen
-                                    ? "−"
-                                    : "+"}
+                                  <ChevronDown
+                                    size={15}
+                                    className={`transition-transform ${
+                                      exportCategoriesOpen ? "rotate-180" : ""
+                                    }`}
+                                  />
                                 </button>
-
                               </div>
-
                               {exportCategoriesOpen && (
                                 <MobileCategoryList
-                                  categoryList={
-                                    exportCategories
-                                  }
+                                  categoryList={exportCategories}
                                   accent="blue"
                                 />
                               )}
-
                             </div>
 
-                            {/* =================================================
-                                IMPORT
-                            ================================================= */}
-
-                            <div>
-
+                            <div className="mt-1">
                               <div className="flex items-center">
-
                                 <Link
-                                  href="/products/import"
+                                  href={`/${currentLocale}/products/import`}
                                   onClick={closeMobile}
                                   className="flex-1 rounded-xl px-4 py-3 font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                                 >
-                                  Import Products
+                                  {t("importProducts")}
                                 </Link>
-
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    setImportCategoriesOpen(
-                                      (current) =>
-                                        !current
-                                    )
+                                    setImportCategoriesOpen((current) => !current)
                                   }
-                                  className="mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-lg text-[#c9a24d] dark:text-[#d8b45b]"
+                                  className="mr-1 flex h-8 w-8 items-center justify-center rounded-full text-[#c9a24d] dark:text-[#d8b45b]"
                                 >
-                                  {importCategoriesOpen
-                                    ? "−"
-                                    : "+"}
+                                  <ChevronDown
+                                    size={15}
+                                    className={`transition-transform ${
+                                      importCategoriesOpen ? "rotate-180" : ""
+                                    }`}
+                                  />
                                 </button>
-
                               </div>
-
                               {importCategoriesOpen && (
                                 <MobileCategoryList
-                                  categoryList={
-                                    importCategories
-                                  }
+                                  categoryList={importCategories}
                                   accent="gold"
                                 />
                               )}
-
                             </div>
-
-                            {categoriesLoading && (
-                              <div className="px-4 py-3 text-xs text-[var(--foreground)]/45">
-                                Loading product categories...
-                              </div>
-                            )}
-
                           </div>
                         )}
                       </div>
 
-                      {/* GALLERY */}
-
                       <Link
-                        href="/gallery"
+                        href={`/${currentLocale}/gallery`}
                         onClick={closeMobile}
                         className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                       >
-                        Gallery
+                        {t("gallery")}
                       </Link>
 
-                      {/* BLOG */}
-
                       <Link
-                        href="/blog"
+                        href={`/${currentLocale}/blog`}
                         onClick={closeMobile}
                         className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                       >
-                        Blog
+                        {t("blog")}
                       </Link>
 
-                      {/* CONTACT */}
-
                       <Link
-                        href="/contact"
+                        href={`/${currentLocale}/contact`}
                         onClick={closeMobile}
                         className="rounded-xl px-4 py-3 font-medium text-[var(--foreground)] transition hover:bg-[var(--primary-light)]"
                       >
-                        Contact
+                        {t("contact")}
                       </Link>
-
-                      {/* DASHBOARD */}
-
-                      {isAdmin && (
-                        <Link
-                          href="/admin/dashboard"
-                          onClick={closeMobile}
-                          className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 font-bold text-blue-600 transition hover:bg-blue-600 hover:text-white"
-                        >
-                          <LayoutDashboard size={18} />
-                          Dashboard
-                        </Link>
-                      )}
-
-                      {/* GET A QUOTE */}
-
-                      <Link
-                        href="/contact"
-                        onClick={closeMobile}
-                        className="gradient-button mt-3 flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-white"
-                      >
-                        Get a Quote
-                        <ArrowUpRight size={17} />
-                      </Link>
-
                     </nav>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-
           </div>
         </div>
       </header>
