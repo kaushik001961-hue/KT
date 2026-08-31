@@ -47,7 +47,6 @@ const exportCountries = [
   { name: "Nigeria", code: "ng" },
   { name: "Norway", code: "no" },
   { name: "Oman", code: "om" },
-  { name: "Pakistan", code: "pk" },
   { name: "Philippines", code: "ph" },
   { name: "Poland", code: "pl" },
   { name: "Portugal", code: "pt" },
