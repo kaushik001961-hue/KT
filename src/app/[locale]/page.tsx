@@ -1,95 +1,218 @@
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { ArrowUpRight, ShieldCheck, Globe, Share2, MessageCircle, Send } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
+import {
+  ArrowRight,
+  Globe2,
+  PackageCheck,
+  ShieldCheck,
+  Target,
+} from 'lucide-react';
+
+import Hero from '@/components/home/Hero';
 
 export default function HomePage() {
-  const t = useTranslations("HomePage");
+  const t = useTranslations('HomePage');
 
   return (
-    <main className="gradient-section overflow-hidden pt-28 sm:pt-36">
-      {/* Hero Section */}
-      <section className="relative px-4 py-12 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-[96rem]">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
-            
-            {/* Left Content */}
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--primary)] shadow-sm">
-                <ShieldCheck size={14} className="text-[#c9a24d]" />
-                Global Exporter & Importer
+    <main className="gradient-section overflow-hidden">
+      {/* HERO */}
+      <Hero />
+
+      {/* ABOUT */}
+      <section className="gradient-section px-5 py-20 sm:py-24 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <div className="text-sm font-bold uppercase tracking-[0.2em] text-[#c9a24d] dark:text-[#d8b45b]">
+                {t('aboutTag')}
               </div>
 
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-[var(--foreground)] sm:text-6xl lg:text-7xl">
-                Connecting Global Markets with <span className="text-[var(--primary)]">Trust</span>
-              </h1>
+              <h2 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-[var(--foreground)] sm:text-5xl">
+                {t('aboutTitle1')}
+                <span className="block gradient-text">
+                  {t('aboutTitle2')}
+                </span>
+              </h2>
 
-              <p className="mt-6 text-base text-[var(--foreground)]/70 sm:text-lg lg:text-xl">
-                Krupali Traders Private Limited delivers excellence across international borders. We source, supply, and trade superior grade products worldwide with unmatched reliability.
+              <p className="mt-6 max-w-xl text-base leading-8 text-[var(--foreground)]/65 sm:text-lg">
+                {t('aboutDesc')}
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/en/products"
-                  className="gradient-button flex items-center gap-2 rounded-full px-8 py-4 text-base font-bold text-white shadow-xl transition hover:brightness-110"
-                >
-                  Explore Products
-                  <ArrowUpRight size={18} />
-                </Link>
+              <Link
+                href="/about"
+                className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 font-semibold text-[var(--foreground)] shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                {t('learnMore')}
+                <ArrowRight size={17} />
+              </Link>
+            </div>
 
-                <Link
-                  href="/en/contact"
-                  className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-8 py-4 text-base font-bold text-[var(--foreground)] shadow-sm transition hover:bg-[var(--primary-light)]"
-                >
-                  Contact Us
-                </Link>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="gradient-card gradient-border rounded-[2rem] p-7">
+                <Globe2 size={28} className="text-[#1455a0] dark:text-[#68b0ff]" />
+                <h3 className="mt-5 text-xl font-bold text-[var(--foreground)]">
+                  {t('globalReach')}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--foreground)]/60">
+                  {t('globalReachDesc')}
+                </p>
               </div>
 
-              {/* Social Media Links Bar */}
-              <div className="mt-8 flex items-center gap-4 text-[var(--foreground)]/70">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/50">Connect:</span>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="rounded-full border border-[var(--border)] bg-[var(--surface)] p-2.5 hover:text-[var(--primary)] transition shadow-sm">
-                  <MessageCircle size={18} />
-                </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="rounded-full border border-[var(--border)] bg-[var(--surface)] p-2.5 hover:text-[var(--primary)] transition shadow-sm">
-                  <Globe size={18} />
-                </a>
-                <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" className="rounded-full border border-[var(--border)] bg-[var(--surface)] p-2.5 hover:text-[var(--primary)] transition shadow-sm">
-                  <Send size={18} />
-                </a>
+              <div className="gradient-card gradient-border rounded-[2rem] p-7">
+                <ShieldCheck size={28} className="text-[#1455a0] dark:text-[#68b0ff]" />
+                <h3 className="mt-5 text-xl font-bold text-[var(--foreground)]">
+                  {t('trustedTrade')}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--foreground)]/60">
+                  {t('trustedTradeDesc')}
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <div className="mt-12 grid grid-cols-3 gap-6 border-t border-[var(--border)] pt-8">
-                <div>
-                  <div className="text-2xl font-black text-[var(--primary)] sm:text-3xl">100+</div>
-                  <div className="mt-1 text-xs text-[var(--foreground)]/60 sm:text-sm">Global Partners</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-[#c9a24d] sm:text-3xl">50+</div>
-                  <div className="mt-1 text-xs text-[var(--foreground)]/60 sm:text-sm">Products Shipped</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-[var(--primary)] sm:text-3xl">24/7</div>
-                  <div className="mt-1 text-xs text-[var(--foreground)]/60 sm:text-sm">Trade Support</div>
-                </div>
+      {/* PRODUCTS */}
+      <section className="gradient-section px-5 py-20 sm:py-24 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="text-sm font-bold uppercase tracking-[0.2em] text-[#c9a24d] dark:text-[#d8b45b]">
+              {t('productsTag')}
+            </div>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-[var(--foreground)] sm:text-5xl">
+              {t('productsTitle1')}
+              <span className="block gradient-text">
+                {t('productsTitle2')}
+              </span>
+            </h2>
+            <p className="mt-5 text-base leading-8 text-[var(--foreground)]/65 sm:text-lg">
+              {t('productsDesc')}
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {/* EXPORT */}
+            <div className="group relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#07111f] via-[#0b3266] to-[#1455a0] p-8 text-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl sm:p-10">
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#68b0ff]/10 blur-3xl transition duration-500 group-hover:scale-125" />
+              <div className="relative">
+                <Globe2 size={32} className="text-[#9bcfff]" />
+                <h3 className="mt-7 text-3xl font-bold">{t('exportTitle')}</h3>
+                <p className="mt-4 max-w-xl leading-7 text-white/70">
+                  {t('exportDesc')}
+                </p>
+                <Link
+                  href="/products/export"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-[#0b3266] transition duration-300 hover:-translate-y-1"
+                >
+                  {t('exportBtn')}
+                  <ArrowRight size={17} />
+                </Link>
               </div>
             </div>
 
-            {/* Right Graphic/Logo Container */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative h-72 w-72 sm:h-96 sm:w-96 overflow-hidden rounded-full border-4 border-[var(--border)] bg-[var(--surface)] shadow-2xl flex items-center justify-center">
-                <Image
-                  src="/images/Krupali-Traders-Logo.gif"
-                  alt="Krupali Traders Private Limited"
-                  fill
-                  priority
-                  unoptimized
-                  className="object-cover"
-                  sizes="(max-width: 640px) 288px, 384px"
-                />
+            {/* IMPORT */}
+            <div className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-10">
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#2d7dd2]/10 blur-3xl transition duration-500 group-hover:scale-125" />
+              <div className="relative">
+                <PackageCheck size={32} className="text-[#1455a0] dark:text-[#68b0ff]" />
+                <h3 className="mt-7 text-3xl font-bold text-[var(--foreground)]">
+                  {t('importTitle')}
+                </h3>
+                <p className="mt-4 max-w-xl leading-7 text-[var(--foreground)]/60">
+                  {t('importDesc')}
+                </p>
+                <Link
+                  href="/products/import"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#1455a0] px-6 py-3 font-semibold text-white transition duration-300 hover:-translate-y-1"
+                >
+                  {t('importBtn')}
+                  <ArrowRight size={17} />
+                </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
+      {/* WHY US */}
+      <section className="gradient-section px-5 py-20 sm:py-24 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="text-sm font-bold uppercase tracking-[0.2em] text-[#c9a24d] dark:text-[#d8b45b]">
+              {t('whyUsTag')}
+            </div>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-[var(--foreground)] sm:text-5xl">
+              {t('whyUsTitle1')}
+              <span className="block gradient-text">
+                {t('whyUsTitle2')}
+              </span>
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="gradient-card gradient-border rounded-[2rem] p-8 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+                <Globe2 size={28} className="text-[#1455a0] dark:text-[#68b0ff]" />
+              </div>
+              <h3 className="mt-6 text-xl font-bold text-[var(--foreground)]">
+                {t('why1Title')}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground)]/60">
+                {t('why1Desc')}
+              </p>
+            </div>
+
+            <div className="gradient-card gradient-border rounded-[2rem] p-8 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+                <ShieldCheck size={28} className="text-[#1455a0] dark:text-[#68b0ff]" />
+              </div>
+              <h3 className="mt-6 text-xl font-bold text-[var(--foreground)]">
+                {t('why2Title')}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground)]/60">
+                {t('why2Desc')}
+              </p>
+            </div>
+
+            <div className="gradient-card gradient-border rounded-[2rem] p-8 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primary-light)]">
+                <Target size={28} className="text-[#1455a0] dark:text-[#68b0ff]" />
+              </div>
+              <h3 className="mt-6 text-xl font-bold text-[var(--foreground)]">
+                {t('why3Title')}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--foreground)]/60">
+                {t('why3Desc')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="gradient-section px-5 pb-20 sm:pb-24 lg:px-8 lg:pb-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#07111f] via-[#0b3266] to-[#1455a0] p-8 text-center text-white shadow-2xl sm:p-12 lg:p-16">
+            <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#68b0ff]/10 blur-3xl" />
+            <div className="absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-[#c9a24d]/10 blur-3xl" />
+            <div className="relative mx-auto max-w-3xl">
+              <div className="text-sm font-bold uppercase tracking-[0.2em] text-[#d8b45b]">
+                {t('ctaTag')}
+              </div>
+              <h2 className="mt-4 text-3xl font-bold sm:text-4xl lg:text-5xl">
+                {t('ctaTitle')}
+              </h2>
+              <p className="mx-auto mt-5 max-w-2xl leading-7 text-white/70">
+                {t('ctaDesc')}
+              </p>
+              <Link
+                href="/contact"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-[#0b3266] shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
+              >
+                {t('ctaBtn')}
+                <ArrowRight size={18} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
