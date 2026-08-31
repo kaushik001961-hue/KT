@@ -10,6 +10,59 @@ import {
 
 import Hero from '@/components/home/Hero';
 
+const exportCountries = [
+  { name: "Afghanistan", code: "af" },
+  { name: "Albania", code: "al" },
+  { name: "Algeria", code: "dz" },
+  { name: "Argentina", code: "ar" },
+  { name: "Australia", code: "au" },
+  { name: "Austria", code: "at" },
+  { name: "Bangladesh", code: "bd" },
+  { name: "Belgium", code: "be" },
+  { name: "Brazil", code: "br" },
+  { name: "Canada", code: "ca" },
+  { name: "Chile", code: "cl" },
+  { name: "China", code: "cn" },
+  { name: "Colombia", code: "co" },
+  { name: "Denmark", code: "dk" },
+  { name: "Egypt", code: "eg" },
+  { name: "France", code: "fr" },
+  { name: "Germany", code: "de" },
+  { name: "Greece", code: "gr" },
+  { name: "Hungary", code: "hu" },
+  { name: "India", code: "in" },
+  { name: "Indonesia", code: "id" },
+  { name: "Iran", code: "ir" },
+  { name: "Iraq", code: "iq" },
+  { name: "Ireland", code: "ie" },
+  { name: "Italy", code: "it" },
+  { name: "Japan", code: "jp" },
+  { name: "Jordan", code: "jo" },
+  { name: "Kenya", code: "ke" },
+  { name: "Malaysia", code: "my" },
+  { name: "Mexico", code: "mx" },
+  { name: "Morocco", code: "ma" },
+  { name: "Netherlands", code: "nl" },
+  { name: "New Zealand", code: "nz" },
+  { name: "Nigeria", code: "ng" },
+  { name: "Norway", code: "no" },
+  { name: "Oman", code: "om" },
+  { name: "Pakistan", code: "pk" },
+  { name: "Philippines", code: "ph" },
+  { name: "Poland", code: "pl" },
+  { name: "Portugal", code: "pt" },
+  { name: "Qatar", code: "qa" },
+  { name: "Russia", code: "ru" },
+  { name: "Saudi Arabia", code: "sa" },
+  { name: "Singapore", code: "sg" },
+  { name: "South Africa", code: "za" },
+  { name: "South Korea", code: "kr" },
+  { name: "Spain", code: "es" },
+  { name: "Sweden", code: "se" },
+  { name: "Switzerland", code: "ch" },
+  { name: "Thailand", code: "th" },
+];
+
 export default function HomePage() {
   const t = useTranslations('HomePage');
 
@@ -213,6 +266,35 @@ export default function HomePage() {
                 <ArrowRight size={18} />
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MULTI-ROW EXPORT DESTINATIONS GRID WITH FLAGS (ABOVE FOOTER) */}
+      <section className="relative z-10 py-16 border-t border-[var(--border)]/40 bg-[var(--surface)]/40 backdrop-blur-md">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-12 mb-8">
+          <div className="text-center">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-[#c9a24d]">Global Reach</h2>
+            <p className="mt-1 text-xl font-extrabold text-[var(--foreground)]">Proudly Exporting to 50+ Countries Worldwide</p>
+          </div>
+        </div>
+
+        {/* Multi-row layout using flagcdn image icons for verified, universal flag rendering */}
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3">
+            {exportCountries.map((country, index) => (
+              <div
+                key={index}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/90 text-[var(--foreground)] shadow-sm backdrop-blur-sm text-xs sm:text-sm font-semibold transition hover:scale-105"
+              >
+                <img
+                  src={`https://flagcdn.com/w40/${country.code}.png`}
+                  alt={`${country.name} flag`}
+                  className="w-5 h-3.5 object-cover rounded-xs shrink-0"
+                />
+                <span className="tracking-wide">{country.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
