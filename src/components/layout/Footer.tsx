@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -17,9 +18,9 @@ import {
 /* ============================================================
     SOCIAL MEDIA CONFIGURATION
 
-    Replace YOUR_NUMBER with the actual WhatsApp number later.
+    WhatsApp number is configured below.
 
-    Indian example:
+    Indian format:
     919876543210
 
     Do NOT use:
@@ -31,12 +32,9 @@ const WHATSAPP_NUMBER = "919601090109";
 const whatsappMessage =
   "Hello Krupali Traders Private Limited, I am interested in your products. Please provide me with more information.";
 
-const whatsappUrl =
-  WHATSAPP_NUMBER === "YOUR_NUMBER"
-    ? "#"
-    : `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-        whatsappMessage
-      )}`;
+const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  whatsappMessage
+)}`;
 
 /* ============================================================
     SOCIAL LINKS
@@ -362,7 +360,7 @@ export default function Footer() {
                   />
 
                   <span>
-                    207, 2nd Floor, White House Complex, 
+                    207, 2nd Floor, White House Complex,
                     Sector 11, Gandhinagar, Gujarat -382010.
                     <br />
                     India
@@ -402,9 +400,9 @@ export default function Footer() {
 
           </div>
 
-          {/* =================================================
+          {/* =====================================================
               COPYRIGHT
-          ================================================= */}
+          ===================================================== */}
 
           <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-7 text-sm text-white/40 sm:flex-row sm:items-center sm:justify-between">
 
