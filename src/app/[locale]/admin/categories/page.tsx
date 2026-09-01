@@ -6,6 +6,10 @@ import {
   Power,
   Trash2,
   X,
+  FolderTree,
+  Globe,
+  Layers,
+  BookOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -627,17 +631,24 @@ export default function CategoriesPage() {
       (category) => category.type === "EXPORT"
     );
 
+  const totalCount = categories.length + blogCategories.length;
+  const importCount = importCategories.length;
+  const exportCount = exportCategories.length;
+  const blogCount = blogCategories.length;
+
   function ProductCategoryList({
+    id,
     title,
     type,
     items,
   }: {
+    id?: string;
     title: string;
     type: ProductType;
     items: ProductCategory[];
   }) {
     return (
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-lg shadow-blue-950/5">
+      <section id={id} className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-lg shadow-blue-950/5 scroll-mt-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">
@@ -815,7 +826,7 @@ export default function CategoriesPage() {
 
   function BlogCategoryList() {
     return (
-      <section className="rounded-[2rem] border border-fuchsia-500/20 bg-[var(--surface)] p-6 shadow-lg shadow-fuchsia-950/10">
+      <section id="blog-section" className="rounded-[2rem] border border-fuchsia-500/20 bg-[var(--surface)] p-6 shadow-lg shadow-fuchsia-950/10 scroll-mt-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-500">
@@ -994,6 +1005,71 @@ export default function CategoriesPage() {
           </p>
         </header>
 
+        {/* SUMMARY METRIC CARDS */}
+        {!loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div 
+              onClick={() => {
+                document.getElementById("import-section")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="cursor-pointer rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-md flex items-center justify-between shadow-lg shadow-blue-950/5 transition hover:scale-[1.02]"
+            >
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--foreground)]/50">Total Categories</p>
+                <h3 className="text-3xl font-black mt-1 text-[var(--foreground)]">{totalCount}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20">
+                <FolderTree className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div 
+              onClick={() => {
+                document.getElementById("import-section")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="cursor-pointer rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-md flex items-center justify-between shadow-lg shadow-blue-950/5 transition hover:scale-[1.02]"
+            >
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--foreground)]/50">Import Categories</p>
+                <h3 className="text-3xl font-black mt-1 text-blue-600">{importCount}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-600 border border-cyan-500/20">
+                <Globe className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div 
+              onClick={() => {
+                document.getElementById("export-section")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="cursor-pointer rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-md flex items-center justify-between shadow-lg shadow-blue-950/5 transition hover:scale-[1.02]"
+            >
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--foreground)]/50">Export Categories</p>
+                <h3 className="text-3xl font-black mt-1 text-emerald-600">{exportCount}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20">
+                <Layers className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div 
+              onClick={() => {
+                document.getElementById("blog-section")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="cursor-pointer rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-md flex items-center justify-between shadow-lg shadow-blue-950/5 transition hover:scale-[1.02]"
+            >
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--foreground)]/50">Blog Categories</p>
+                <h3 className="text-3xl font-black mt-1 text-fuchsia-600">{blogCount}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-600 border border-fuchsia-500/20">
+                <BookOpen className="h-6 w-6" />
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm font-semibold text-red-600">
             {error}
@@ -1015,18 +1091,20 @@ export default function CategoriesPage() {
         ) : (
           <div className="space-y-6">
             <ProductCategoryList
+              id="import-section"
               title="Import Categories"
               type="IMPORT"
               items={importCategories}
             />
 
             <ProductCategoryList
+              id="export-section"
               title="Export Categories"
               type="EXPORT"
               items={exportCategories}
             />
 
-            {/* BLOG CATEGORY â€” SAME FUNCTION, PINK THEME */}
+            {/* BLOG CATEGORY — SAME FUNCTION, PINK THEME */}
             <BlogCategoryList />
           </div>
         )}
@@ -1086,26 +1164,20 @@ export default function CategoriesPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
-                  Category Type *
+                  Type
                 </label>
-
                 <select
                   value={productForm.type}
                   onChange={(event) =>
                     setProductForm({
                       ...productForm,
-                      type:
-                        event.target.value as ProductType,
+                      type: event.target.value as ProductType,
                     })
                   }
-                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 text-sm font-semibold text-[var(--foreground)] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 text-sm text-[var(--foreground)] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 >
-                  <option value="IMPORT">
-                    Import
-                  </option>
-                  <option value="EXPORT">
-                    Export
-                  </option>
+                  <option value="IMPORT">IMPORT</option>
+                  <option value="EXPORT">EXPORT</option>
                 </select>
               </div>
 
@@ -1113,19 +1185,17 @@ export default function CategoriesPage() {
                 <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
                   Description
                 </label>
-
                 <textarea
                   value={productForm.description}
                   onChange={(event) =>
                     setProductForm({
                       ...productForm,
-                      description:
-                        event.target.value,
+                      description: event.target.value,
                     })
                   }
-                  rows={4}
-                  placeholder="Optional category description..."
-                  className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground)] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  placeholder="Optional description..."
+                  className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4 text-sm text-[var(--foreground)] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  rows={3}
                 />
               </div>
 
@@ -1133,80 +1203,55 @@ export default function CategoriesPage() {
                 <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
                   Category Image
                 </label>
-
-                <div className="rounded-2xl border border-dashed border-blue-500/30 bg-[var(--surface-soft)] p-4">
-                  {categoryImagePreview ? (
-                    <div className="mb-4 overflow-hidden rounded-2xl border border-[var(--border)]">
-                      <img
-                        src={categoryImagePreview}
-                        alt="Category preview"
-                        className="h-44 w-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="mb-4 flex h-36 items-center justify-center rounded-2xl bg-blue-500/5 text-sm font-semibold text-[var(--foreground)]/40">
-                      No category image selected
-                    </div>
-                  )}
-
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/avif"
-                    onChange={handleCategoryImageChange}
-                    className="block w-full cursor-pointer text-sm text-[var(--foreground)]/70 file:mr-4 file:rounded-full file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-blue-700"
-                  />
-
-                  <p className="mt-2 text-xs text-[var(--foreground)]/45">
-                    JPG, PNG, WEBP or AVIF. Maximum 10 MB.
-                  </p>
-                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCategoryImageChange}
+                  className="w-full text-sm text-[var(--foreground)] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-500/10 file:text-blue-600 hover:file:bg-blue-500/20"
+                />
+                {categoryImagePreview && (
+                  <div className="mt-3">
+                    <img
+                      src={categoryImagePreview}
+                      alt="Preview"
+                      className="h-20 w-32 rounded-xl object-cover border border-[var(--border)]"
+                    />
+                  </div>
+                )}
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
+                  id="productActive"
                   checked={productForm.active}
                   onChange={(event) =>
                     setProductForm({
                       ...productForm,
-                      active:
-                        event.target.checked,
+                      active: event.target.checked,
                     })
                   }
-                  className="h-5 w-5 rounded text-blue-600"
+                  className="h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
                 />
+                <label htmlFor="productActive" className="text-sm font-bold text-[var(--foreground)]">
+                  Active
+                </label>
+              </div>
 
-                <div>
-                  <p className="font-bold text-[var(--foreground)]">
-                    Active Category
-                  </p>
-
-                  <p className="mt-1 text-xs text-[var(--foreground)]/45">
-                    Active categories appear in the product form.
-                  </p>
-                </div>
-              </label>
-
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={closeForms}
-                  disabled={saving}
-                  className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-bold text-[var(--foreground)] transition hover:border-blue-500"
+                  className="rounded-full px-5 py-3 text-sm font-bold text-[var(--foreground)]/60 hover:bg-[var(--surface-soft)] transition"
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 disabled:opacity-60"
+                  className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 disabled:opacity-50"
                 >
-                  {saving
-                    ? "Saving..."
-                    : editingId
-                      ? "Update Category"
-                      : "Create Category"}
+                  {saving ? "Saving..." : editingId ? "Update Category" : "Create Category"}
                 </button>
               </div>
             </form>
@@ -1214,11 +1259,11 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* BLOG CATEGORY MODAL â€” PINK */}
+      {/* BLOG CATEGORY MODAL */}
 
       {showBlogForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-[2rem] border border-fuchsia-500/20 bg-[var(--surface)] p-6 shadow-2xl sm:p-8">
+          <div className="w-full max-w-lg rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl sm:p-8">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-500">
@@ -1237,7 +1282,7 @@ export default function CategoriesPage() {
               <button
                 type="button"
                 onClick={closeForms}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-soft)] text-[var(--foreground)]/60 transition hover:text-fuchsia-500"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-soft)] text-[var(--foreground)]/60 transition hover:text-red-600"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1249,25 +1294,20 @@ export default function CategoriesPage() {
             >
               <div>
                 <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
-                  Category Name *
+                  Blog Category Name *
                 </label>
 
                 <input
                   type="text"
                   value={blogForm.name}
-                  onChange={(event) => {
-                    const value =
-                      event.target.value;
-
+                  onChange={(event) =>
                     setBlogForm({
                       ...blogForm,
-                      name: value,
-                      slug: editingBlogId
-                        ? blogForm.slug
-                        : slugify(value),
-                    });
-                  }}
-                  placeholder="Example: Market Trends"
+                      name: event.target.value,
+                      slug: editingBlogId ? blogForm.slug : slugify(event.target.value),
+                    })
+                  }
+                  placeholder="Example: Logistics Insights"
                   className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 text-sm text-[var(--foreground)] outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-500/10"
                 />
               </div>
@@ -1283,12 +1323,10 @@ export default function CategoriesPage() {
                   onChange={(event) =>
                     setBlogForm({
                       ...blogForm,
-                      slug: slugify(
-                        event.target.value
-                      ),
+                      slug: event.target.value,
                     })
                   }
-                  placeholder="market-trends"
+                  placeholder="logistics-insights"
                   className="h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 text-sm text-[var(--foreground)] outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-500/10"
                 />
               </div>
@@ -1297,67 +1335,52 @@ export default function CategoriesPage() {
                 <label className="mb-2 block text-sm font-bold text-[var(--foreground)]">
                   Description
                 </label>
-
                 <textarea
                   value={blogForm.description}
                   onChange={(event) =>
                     setBlogForm({
                       ...blogForm,
-                      description:
-                        event.target.value,
+                      description: event.target.value,
                     })
                   }
-                  rows={4}
-                  placeholder="Optional Blog category description..."
-                  className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3 text-sm leading-6 text-[var(--foreground)] outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-500/10"
+                  placeholder="Optional description..."
+                  className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4 text-sm text-[var(--foreground)] outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-500/10"
+                  rows={3}
                 />
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-fuchsia-500/15 bg-fuchsia-500/5 p-4">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
+                  id="blogActive"
                   checked={blogForm.active}
                   onChange={(event) =>
                     setBlogForm({
                       ...blogForm,
-                      active:
-                        event.target.checked,
+                      active: event.target.checked,
                     })
                   }
-                  className="h-5 w-5 rounded accent-fuchsia-500"
+                  className="h-4 w-4 rounded border-[var(--border)] text-fuchsia-600 focus:ring-fuchsia-500"
                 />
+                <label htmlFor="blogActive" className="text-sm font-bold text-[var(--foreground)]">
+                  Active
+                </label>
+              </div>
 
-                <div>
-                  <p className="font-bold text-[var(--foreground)]">
-                    Active Blog Category
-                  </p>
-
-                  <p className="mt-1 text-xs text-[var(--foreground)]/45">
-                    Active Blog categories will appear in the Blog article category dropdown.
-                  </p>
-                </div>
-              </label>
-
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={closeForms}
-                  disabled={saving}
-                  className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-bold text-[var(--foreground)] transition hover:border-fuchsia-500"
+                  className="rounded-full px-5 py-3 text-sm font-bold text-[var(--foreground)]/60 hover:bg-[var(--surface-soft)] transition"
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-full bg-gradient-to-r from-fuchsia-600 to-pink-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-600/20 disabled:opacity-60"
+                  className="rounded-full bg-gradient-to-r from-fuchsia-600 to-pink-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-600/20 transition hover:-translate-y-0.5 disabled:opacity-50"
                 >
-                  {saving
-                    ? "Saving..."
-                    : editingBlogId
-                      ? "Update Blog Category"
-                      : "Create Blog Category"}
+                  {saving ? "Saving..." : editingBlogId ? "Update Blog Category" : "Create Blog Category"}
                 </button>
               </div>
             </form>

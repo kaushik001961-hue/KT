@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.push("/en/admin/dashboard");
       router.refresh();
     } catch {
       setError("Unable to connect to the server.");
@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--background)] px-5 py-10">
+    <div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-hidden bg-[#050d18] px-5 py-10 text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl" />
@@ -61,26 +61,26 @@ export default function AdminLoginPage() {
             KT
           </div>
 
-          <h1 className="mt-6 text-3xl font-black tracking-tight text-[var(--foreground)]">
+          <h1 className="mt-6 text-3xl font-black tracking-tight text-white">
             Admin Login
           </h1>
 
-          <p className="mt-2 text-sm text-[var(--foreground)]/60">
+          <p className="mt-2 text-sm text-white/60">
             Krupali Traders Private Limited
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)]/90 p-7 shadow-2xl shadow-blue-900/10 backdrop-blur-xl sm:p-9"
+          className="rounded-[2rem] border border-white/10 bg-[#071b34]/90 p-7 shadow-2xl shadow-blue-950/40 backdrop-blur-xl sm:p-9"
         >
           <div>
-            <label className="text-sm font-semibold text-[var(--foreground)]">
+            <label className="text-sm font-semibold text-white/80">
               Email
             </label>
 
             <div className="relative mt-2">
-              <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+              <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
 
               <input
                 type="email"
@@ -88,19 +88,19 @@ export default function AdminLoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 required
-                className="h-13 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] pl-12 pr-4 text-sm text-[var(--foreground)] outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="h-13 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 placeholder="admin@krupalitraders.com"
               />
             </div>
           </div>
 
           <div className="mt-5">
-            <label className="text-sm font-semibold text-[var(--foreground)]">
+            <label className="text-sm font-semibold text-white/80">
               Password
             </label>
 
             <div className="relative mt-2">
-              <LockKeyhole className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+              <LockKeyhole className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
 
               <input
                 type="password"
@@ -108,14 +108,14 @@ export default function AdminLoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
                 required
-                className="h-13 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] pl-12 pr-4 text-sm text-[var(--foreground)] outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="h-13 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 placeholder="Enter your password"
               />
             </div>
           </div>
 
           {error && (
-            <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
+            <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-400">
               {error}
             </div>
           )}
@@ -139,6 +139,6 @@ export default function AdminLoginPage() {
           </button>
         </form>
       </div>
-    </main>
+    </div>
   );
 }

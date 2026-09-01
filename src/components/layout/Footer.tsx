@@ -15,18 +15,18 @@ import {
 } from "react-icons/fa";
 
 /* ============================================================
-   SOCIAL MEDIA CONFIGURATION
+    SOCIAL MEDIA CONFIGURATION
 
-   Replace YOUR_NUMBER with the actual WhatsApp number later.
+    Replace YOUR_NUMBER with the actual WhatsApp number later.
 
-   Indian example:
-   919876543210
+    Indian example:
+    919876543210
 
-   Do NOT use:
-   +91 98765 43210
-   ============================================================ */
+    Do NOT use:
+    +91 98765 43210
+    ============================================================ */
 
-const WHATSAPP_NUMBER = "YOUR_NUMBER";
+const WHATSAPP_NUMBER = "919601090109";
 
 const whatsappMessage =
   "Hello Krupali Traders Private Limited, I am interested in your products. Please provide me with more information.";
@@ -39,13 +39,13 @@ const whatsappUrl =
       )}`;
 
 /* ============================================================
-   SOCIAL LINKS
+    SOCIAL LINKS
 ============================================================ */
 
 const socialLinks = [
   {
     name: "Facebook",
-    href: "#",
+    href: "https://www.facebook.com/share/185v8b6Q1c/",
     icon: FaFacebookF,
     color: "text-[#1877F2]",
     hoverBorder: "hover:border-[#1877F2]/50",
@@ -54,7 +54,7 @@ const socialLinks = [
   },
   {
     name: "Instagram",
-    href: "#",
+    href: "https://www.instagram.com/krupalitraderspvtltd/",
     icon: FaInstagram,
     color: "text-[#E4405F]",
     hoverBorder: "hover:border-[#E4405F]/50",
@@ -63,7 +63,7 @@ const socialLinks = [
   },
   {
     name: "LinkedIn",
-    href: "#",
+    href: "https://linkedin.com/in/arvind-jethva-047b59432",
     icon: FaLinkedinIn,
     color: "text-[#0A66C2]",
     hoverBorder: "hover:border-[#0A66C2]/50",
@@ -72,7 +72,7 @@ const socialLinks = [
   },
   {
     name: "YouTube",
-    href: "#",
+    href: "https://youtube.com/@krupalitradersprivatelimited",
     icon: FaYoutube,
     color: "text-[#FF0000]",
     hoverBorder: "hover:border-[#FF0000]/50",
