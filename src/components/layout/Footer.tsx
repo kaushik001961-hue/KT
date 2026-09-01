@@ -72,7 +72,7 @@ const socialLinks = [
   },
   {
     name: "YouTube",
-    href: "https://youtube.com/@krupalitradersprivatelimited",
+    href: "https://www.youtube.com/@KrupaliTradersPrivateLimited",
     icon: FaYoutube,
     color: "text-[#FF0000]",
     hoverBorder: "hover:border-[#FF0000]/50",
