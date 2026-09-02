@@ -1,0 +1,152 @@
+[
+  {
+    "name": "Black Pepper",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Premium quality black pepper sourced from trusted suppliers for international markets.",
+    "description": "Krupali Traders Private Limited sources and supplies premium black pepper for international buyers, wholesalers, distributors, food manufacturers and spice traders. Our black pepper is carefully selected for aroma, pungency, cleanliness and consistent quality.",
+    "specifications": "Product: Black Pepper\nForm: Whole\nQuality: Premium\nOrigin: India\nColor: Black/Brown\nApplication: Food processing, seasoning and spice manufacturing",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg bags or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": true,
+    "status": "PUBLISHED",
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1599909533730-f9d7f7f0d7c5",
+        "alt": "Premium black pepper"
+      }
+    ]
+  },
+  {
+    "name": "Green Cardamom",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Aromatic premium green cardamom sourced for global spice markets.",
+    "description": "Premium green cardamom selected for its distinctive aroma, natural flavor and excellent appearance. Suitable for food manufacturers, wholesalers, distributors and international spice buyers.",
+    "specifications": "Product: Green Cardamom\nForm: Whole Pods\nQuality: Premium\nOrigin: India\nApplication: Food, beverages, confectionery and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "5 kg, 10 kg, 25 kg or customized packaging",
+    "minimumOrderQuantity": "100 kg",
+    "featured": true,
+    "status": "PUBLISHED",
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1599909533730-f9d7f7f0d7c5",
+        "alt": "Green cardamom"
+      }
+    ]
+  },
+  {
+    "name": "Cumin Seeds",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "High-quality Indian cumin seeds for wholesale and international spice trading.",
+    "description": "Krupali Traders supplies quality cumin seeds sourced from reliable Indian suppliers. Our cumin is suitable for food processing, seasoning, spice blends, restaurants and commercial food production.",
+    "specifications": "Product: Cumin Seeds\nForm: Whole Seeds\nOrigin: India\nQuality: Export Quality\nApplication: Food processing, seasoning and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg bags or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": true,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Coriander Seeds",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Premium Indian coriander seeds supplied for global food and spice markets.",
+    "description": "Quality coriander seeds sourced from trusted suppliers in India. Available for international wholesalers, food manufacturers, distributors and spice traders.",
+    "specifications": "Product: Coriander Seeds\nForm: Whole Seeds\nOrigin: India\nQuality: Premium\nApplication: Spice blends, food processing and seasoning",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg bags or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": false,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Turmeric",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Premium Indian turmeric available in whole and processed forms for international buyers.",
+    "description": "Krupali Traders sources quality Indian turmeric for international food manufacturers, wholesalers, distributors and spice businesses.",
+    "specifications": "Product: Turmeric\nForm: Whole / Powder\nOrigin: India\nQuality: Export Quality\nApplication: Food processing, seasoning and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": true,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Red Chilli",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Quality Indian red chilli sourced for international spice trading and food processing.",
+    "description": "Premium red chilli products sourced through reliable suppliers and made available to international buyers and commercial food businesses.",
+    "specifications": "Product: Red Chilli\nForm: Whole / Powder\nOrigin: India\nQuality: Export Quality\nApplication: Food processing, sauces, seasoning and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": true,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Cloves",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Premium cloves with rich aroma for food processing and international spice markets.",
+    "description": "Quality cloves sourced from trusted suppliers and supplied to international wholesalers, distributors and food manufacturers.",
+    "specifications": "Product: Cloves\nForm: Whole\nQuality: Premium\nApplication: Food, beverages, seasoning and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "10 kg, 25 kg or customized packaging",
+    "minimumOrderQuantity": "100 kg",
+    "featured": false,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Cinnamon",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Premium cinnamon sourced for international food, beverage and spice markets.",
+    "description": "Krupali Traders supplies quality cinnamon suitable for food manufacturers, wholesalers, distributors and commercial buyers.",
+    "specifications": "Product: Cinnamon\nForm: Sticks / Powder\nQuality: Premium\nApplication: Food, beverages, bakery and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "10 kg, 25 kg or customized packaging",
+    "minimumOrderQuantity": "100 kg",
+    "featured": false,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Fennel Seeds",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Quality Indian fennel seeds for food processing and international spice trading.",
+    "description": "Premium fennel seeds sourced from trusted Indian suppliers for wholesalers, distributors and food manufacturers worldwide.",
+    "specifications": "Product: Fennel Seeds\nForm: Whole Seeds\nOrigin: India\nQuality: Export Quality\nApplication: Food, seasoning and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": false,
+    "status": "PUBLISHED",
+    "images": []
+  },
+  {
+    "name": "Fenugreek Seeds",
+    "type": "IMPORT",
+    "category": "Whole Spices",
+    "shortDescription": "Quality Indian fenugreek seeds supplied for global food and spice applications.",
+    "description": "Krupali Traders sources fenugreek seeds from reliable suppliers and connects them with international buyers and commercial markets.",
+    "specifications": "Product: Fenugreek Seeds\nForm: Whole Seeds\nOrigin: India\nQuality: Premium\nApplication: Food processing and spice blends",
+    "countryOfOrigin": "India",
+    "packaging": "25 kg, 50 kg or customized packaging",
+    "minimumOrderQuantity": "500 kg",
+    "featured": false,
+    "status": "PUBLISHED",
+    "images": []
+  }
+]

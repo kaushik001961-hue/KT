@@ -10,6 +10,7 @@ import {
   Search,
   Star,
   Trash2,
+  Upload,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -348,13 +349,23 @@ export default function ExportProductsPage() {
 
             </div>
 
-            <Link
-              href="/admin/products/export/new"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5"
-            >
-              <Plus className="h-5 w-5" />
-              Add Export Product
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/admin/products/export/bulk-update"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-6 py-3.5 text-sm font-bold text-emerald-500 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-white"
+              >
+                <Upload className="h-5 w-5" />
+                Bulk Update
+              </Link>
+
+              <Link
+                href="/admin/products/export/new"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5"
+              >
+                <Plus className="h-5 w-5" />
+                Add Export Product
+              </Link>
+            </div>
 
           </div>
         </header>
@@ -528,13 +539,23 @@ export default function ExportProductsPage() {
               {!search &&
                 !categoryFilter &&
                 statusFilter === "ALL" && (
-                  <Link
-                    href="/admin/products/export/new"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 text-sm font-bold text-white"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Export Product
-                  </Link>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <Link
+                      href="/admin/products/export/bulk-update"
+                      className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-6 py-3 text-sm font-bold text-emerald-500 transition hover:bg-emerald-500 hover:text-white"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Bulk Update
+                    </Link>
+
+                    <Link
+                      href="/admin/products/export/new"
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 text-sm font-bold text-white"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Export Product
+                    </Link>
+                  </div>
                 )}
 
             </div>

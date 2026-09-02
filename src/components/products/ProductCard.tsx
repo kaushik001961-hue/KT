@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Package } from "lucide-react";
 
@@ -57,16 +56,10 @@ export default function ProductCard({
         <div className="relative aspect-[4/3] overflow-hidden bg-[var(--primary-light)]">
 
           {firstImage ? (
-            <Image
+            <img
               src={firstImage}
               alt={imageAlt}
-              fill
-              sizes="
-                (max-width: 640px) 100vw,
-                (max-width: 1024px) 50vw,
-                33vw
-              "
-              className="object-cover transition duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -94,6 +87,7 @@ export default function ProductCard({
               Featured
             </div>
           )}
+
         </div>
       </Link>
 
@@ -130,6 +124,7 @@ export default function ProductCard({
           className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1455a0] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#1455a0]/20 transition duration-300 hover:-translate-y-0.5 hover:bg-[#0f4688] hover:shadow-xl dark:bg-[#1d68b8] dark:hover:bg-[#2678ca]"
         >
           View Product
+
           <ArrowRight
             size={17}
             className="transition-transform duration-300 group-hover:translate-x-1"

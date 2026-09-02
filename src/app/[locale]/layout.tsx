@@ -1,8 +1,8 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { ThemeProvider } from '@/components/layout/ThemeProvider';
-import ClientLayoutWrapper from '@/components/layout/ClientLayoutWrapper';
-import '../globals.css';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
+import "../globals.css";
 
 type LocaleLayoutProps = {
   children: React.ReactNode;
@@ -17,9 +17,15 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html
+      lang={locale}
+      suppressHydrationWarning
+    >
       <body suppressHydrationWarning>
-        <NextIntlClientProvider messages={messages} locale={locale}>
+        <NextIntlClientProvider
+          messages={messages}
+          locale={locale}
+        >
           <ThemeProvider>
             <ClientLayoutWrapper>
               {children}
