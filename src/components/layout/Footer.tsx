@@ -43,7 +43,7 @@ const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
 const socialLinks = [
   {
     name: "Facebook",
-    href: "https://www.facebook.com/share/185v8b6Q1c/",
+    href: "https://www.facebook.com/profile.php?id=61594078650660",
     icon: FaFacebookF,
     color: "text-[#1877F2]",
     hoverBorder: "hover:border-[#1877F2]/50",

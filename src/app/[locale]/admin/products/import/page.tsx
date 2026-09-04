@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Edit3,
   Eye,
+  Download,
   FileJson,
   FileSpreadsheet,
   Loader2,
@@ -27,6 +28,8 @@ import {
   useState,
 } from "react";
 
+import BulkImageUpload from "@/components/admin/BulkImageUpload";
+
 type ProductStatus =
   | "DRAFT"
   | "PUBLISHED"
@@ -41,6 +44,11 @@ type Product = {
   type: ProductType;
   status: ProductStatus;
   shortDescription: string | null;
+  description?: string | null;
+  specifications?: string | null;
+  countryOfOrigin?: string | null;
+  packaging?: string | null;
+  minimumOrderQuantity?: string | null;
   featured: boolean;
   categoryId: string | null;
 
@@ -580,6 +588,8 @@ export default function ImportProductsPage() {
     setSuccess,
   ] = useState("");
 
+  const [showBulkImages, setShowBulkImages] = useState(false);
+
   const [
     search,
     setSearch,
@@ -963,6 +973,91 @@ export default function ImportProductsPage() {
     }
 
     return "bg-amber-500/10 text-amber-600";
+  }
+
+  /* =======================================================
+     BULK DOWNLOAD CURRENT IMPORT PRODUCTS
+  ======================================================= */
+
+  function escapeDownloadCSV(value: unknown) {
+    const text = value === null || value === undefined ? "" : String(value);
+    return text.includes(",") || text.includes('"') || text.includes("\n")
+      ? `"${text.replace(/"/g, '""')}"`
+      : text;
+  }
+
+  function downloadFile(content: string, filename: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function getAllProductsForDownload() {
+    const response = await fetch("/api/admin/products?type=IMPORT", {
+      cache: "no-store",
+      credentials: "include",
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || "Unable to download products.");
+    }
+    return Array.isArray(result.products) ? result.products : [];
+  }
+
+  async function downloadAllImportCSV() {
+    try {
+      setError("");
+      const allProducts = await getAllProductsForDownload();
+      const headers = [
+        "id", "name", "slug", "type", "status", "category", "categoryId",
+        "shortDescription", "description", "specifications", "countryOfOrigin",
+        "packaging", "minimumOrderQuantity", "featured", "images"
+      ];
+      const rows = allProducts.map((product: Product) => [
+        product.id, product.name, product.slug, "IMPORT", product.status,
+        product.category?.name || "", product.categoryId || "", product.shortDescription || "",
+        product.description || "", product.specifications || "", product.countryOfOrigin || "",
+        product.packaging || "", product.minimumOrderQuantity || "",
+        product.featured ? "true" : "false",
+        (product.images || []).map((image) => image.url).join("|")
+      ].map(escapeDownloadCSV).join(","));
+
+      downloadFile([headers.join(","), ...rows].join("\n"),
+        "krupali-import-products.csv", "text/csv;charset=utf-8;");
+      setSuccess(`${allProducts.length} import products downloaded as CSV.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to download products.");
+    }
+  }
+
+  async function downloadAllImportJSON() {
+    try {
+      setError("");
+      const allProducts = await getAllProductsForDownload();
+      const data = allProducts.map((product: Product) => ({
+        id: product.id, name: product.name, slug: product.slug, type: "IMPORT",
+        status: product.status, category: product.category?.name || "",
+        categoryId: product.categoryId || "", shortDescription: product.shortDescription || "",
+        description: product.description || "", specifications: product.specifications || "",
+        countryOfOrigin: product.countryOfOrigin || "", packaging: product.packaging || "",
+        minimumOrderQuantity: product.minimumOrderQuantity || "", featured: product.featured,
+       images: (product.images || []).map((image) => ({
+  url: image.url,
+  alt: image.alt || ""
+}))
+      }));
+      downloadFile(JSON.stringify({ products: data }, null, 2),
+        "krupali-import-products.json", "application/json;charset=utf-8;");
+      setSuccess(`${allProducts.length} import products downloaded as JSON.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to download products.");
+    }
   }
 
   /* =======================================================
@@ -1614,30 +1709,22 @@ export default function ImportProductsPage() {
         ================================================= */}
 
         <header className="mb-8">
-
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-
               <Link
                 href="/admin/dashboard"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]/45 transition hover:text-blue-600"
               >
                 <ArrowLeft className="h-4 w-4" />
-
                 Back to Dashboard
               </Link>
 
               <div className="mt-5 flex items-center gap-4">
-
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
-
                   <Package className="h-7 w-7" />
-
                 </div>
 
                 <div>
-
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">
                     Product Management
                   </p>
@@ -1645,61 +1732,91 @@ export default function ImportProductsPage() {
                   <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">
                     Import Products
                   </h1>
-
                 </div>
-
               </div>
 
               <p className="mt-3 max-w-2xl text-sm text-[var(--foreground)]/55">
-                Manage products that Krupali
-                Traders imports from
-                international markets.
+                Manage products that Krupali Traders imports from international markets.
               </p>
-
             </div>
 
-            {/* HEADER ACTIONS */}
-
-            <div className="flex flex-wrap items-center gap-3">
-
+            <div className="flex flex-wrap items-center gap-2 lg:max-w-3xl lg:justify-end">
               <button
                 type="button"
-                onClick={
-                  downloadCSVTemplate
-                }
-                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                onClick={downloadCSVTemplate}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-700 dark:border-white/20"
               >
-                <FileSpreadsheet className="h-5 w-5" />
-
-                Download CSV Template
+                <FileSpreadsheet className="h-3.5 w-3.5" />
+                CSV Template
               </button>
 
               <button
                 type="button"
-                onClick={
-                  downloadJSONTemplate
-                }
-                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border-2 border-slate-900 bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+                onClick={downloadJSONTemplate}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-700 dark:border-white/20"
               >
-                <FileJson className="h-5 w-5" />
+                <FileJson className="h-3.5 w-3.5" />
+                JSON Template
+              </button>
 
-                Download JSON Template
+              <button
+                type="button"
+                onClick={downloadAllImportCSV}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 text-xs font-bold text-emerald-600 transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-white"
+              >
+                <Download className="h-3.5 w-3.5" />
+                All CSV
+              </button>
+
+              <button
+                type="button"
+                onClick={downloadAllImportJSON}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 text-xs font-bold text-purple-600 transition hover:-translate-y-0.5 hover:bg-purple-500 hover:text-white"
+              >
+                <Download className="h-3.5 w-3.5" />
+                All JSON
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 text-xs font-bold text-blue-600 transition hover:-translate-y-0.5 hover:bg-blue-500 hover:text-white"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Bulk Import
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowBulkImages(true)}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 text-xs font-bold text-purple-600 transition hover:-translate-y-0.5 hover:bg-purple-500 hover:text-white"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Bulk Images
               </button>
 
               <Link
                 href="/admin/products/import/new"
-                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-3 text-xs font-bold text-white shadow-md shadow-blue-600/15 transition hover:-translate-y-0.5"
               >
-                <Plus className="h-5 w-5" />
-
-                Add Import Product
+                <Plus className="h-3.5 w-3.5" />
+                Add Product
               </Link>
-
             </div>
-
           </div>
-
         </header>
+
+        {showBulkImages && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+            <div className="mx-auto flex min-h-full max-w-3xl items-center justify-center py-8">
+              <BulkImageUpload
+                type="IMPORT"
+                onClose={() => setShowBulkImages(false)}
+                onComplete={loadProducts}
+              />
+            </div>
+          </div>
+        )}
 
         {/* =================================================
             ALERTS
@@ -1733,127 +1850,59 @@ export default function ImportProductsPage() {
             BULK IMPORT
         ================================================= */}
 
-        <section className="mb-8 overflow-hidden rounded-[2rem] border border-blue-500/20 bg-[var(--surface)] shadow-xl shadow-blue-950/5">
-
-          {/* IMPORT HEADER */}
-
-          <div className="border-b border-[var(--border)] bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-5 py-5 sm:px-6">
+        <section
+          id="bulk-import"
+          className="mb-6 overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-r from-blue-500/5 to-cyan-500/5"
+        >
+          <div className="px-5 py-4 sm:px-6">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.json,text/csv,application/json"
+              onChange={handleFile}
+              className="hidden"
+            />
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
+                  <Upload className="h-4 w-4" />
+                </div>
 
-              <div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base font-black">
+                      Bulk Import Products
+                    </h2>
 
-                <div className="flex items-center gap-3">
-
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-
-                    <Upload className="h-5 w-5" />
-
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/10 px-2.5 text-xs font-bold text-blue-600 transition hover:-translate-y-0.5 hover:bg-blue-500 hover:text-white"
+                    >
+                      <Upload className="h-3.5 w-3.5" />
+                      Upload Product File
+                    </button>
                   </div>
 
-                  <h2 className="text-xl font-black">
-                    Bulk Import Products
-                  </h2>
-
+                  <p className="mt-1 text-xs text-[var(--foreground)]/50">
+                    Upload a CSV or JSON file containing multiple import products.
+                  </p>
                 </div>
-
-                <p className="mt-2 text-sm text-[var(--foreground)]/50">
-                  Upload a CSV or JSON file
-                  containing multiple import
-                  products.
-                </p>
-
               </div>
 
-              <div className="rounded-full bg-blue-500/10 px-4 py-2 text-xs font-bold text-blue-600">
+              <span className="shrink-0 self-start rounded-full bg-blue-500/10 px-3 py-1.5 text-[11px] font-bold text-blue-600 sm:self-center">
                 Maximum 500 products
-              </div>
-
+              </span>
             </div>
-
           </div>
 
-          {/* UPLOAD AREA */}
+          {/* PREVIEW — shown only after a file is selected */}
 
-          <div className="p-5 sm:p-6">
+          {importProductsList.length > 0 && (
+            <div className="p-5 sm:p-6">
 
-            {importProductsList.length ===
-            0 ? (
-
-              <div
-                onDragOver={
-                  handleDragOver
-                }
-                onDragLeave={
-                  handleDragLeave
-                }
-                onDrop={
-                  handleDrop
-                }
-                onClick={() =>
-                  fileInputRef.current?.click()
-                }
-                className={`group flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-[1.5rem] border-2 border-dashed px-6 text-center transition ${
-                  dragActive
-                    ? "border-blue-500 bg-blue-500/10"
-                    : "border-[var(--border)] bg-[var(--surface-soft)] hover:border-blue-500/50 hover:bg-blue-500/5"
-                }`}
-              >
-
-                <input
-                  ref={
-                    fileInputRef
-                  }
-                  type="file"
-                  accept=".csv,.json,text/csv,application/json"
-                  onChange={
-                    handleFile
-                  }
-                  className="hidden"
-                />
-
-                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 transition group-hover:scale-105">
-
-                  <Upload className="h-7 w-7" />
-
-                </div>
-
-                <h3 className="text-lg font-black">
-                  {dragActive
-                    ? "Drop your file here"
-                    : "Upload Product File"}
-                </h3>
-
-                <p className="mt-2 max-w-lg text-sm text-[var(--foreground)]/50">
-                  Drag and drop your CSV or
-                  JSON file here, or click to
-                  browse your computer.
-                </p>
-
-                <div className="mt-5 flex flex-wrap justify-center gap-2">
-
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600">
-
-                    <FileSpreadsheet className="h-3.5 w-3.5" />
-
-                    CSV
-                  </span>
-
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-1.5 text-xs font-bold text-purple-600">
-
-                    <FileJson className="h-3.5 w-3.5" />
-
-                    JSON
-                  </span>
-
-                </div>
-
-              </div>
-
-            ) : (
-
-              <>
-                {/* FILE INFORMATION */}
+              {/* FILE INFORMATION */}
 
                 <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -2282,10 +2331,9 @@ export default function ImportProductsPage() {
 
                 </div>
 
-              </>
-            )}
 
-          </div>
+            </div>
+          )}
 
         </section>
 

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import BulkImageUpload from "@/components/admin/BulkImageUpload";
+
 type ProductStatus =
   | "DRAFT"
   | "PUBLISHED"
@@ -59,6 +61,8 @@ export default function ExportProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [showBulkImages, setShowBulkImages] = useState(false);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] =
@@ -358,6 +362,15 @@ export default function ExportProductsPage() {
                 Bulk Update
               </Link>
 
+              <button
+                type="button"
+                onClick={() => setShowBulkImages(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-6 py-3.5 text-sm font-bold text-purple-600 transition hover:-translate-y-0.5 hover:bg-purple-500 hover:text-white"
+              >
+                <Upload className="h-5 w-5" />
+                Bulk Images
+              </button>
+
               <Link
                 href="/admin/products/export/new"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5"
@@ -369,6 +382,18 @@ export default function ExportProductsPage() {
 
           </div>
         </header>
+
+        {showBulkImages && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+            <div className="mx-auto flex min-h-full max-w-3xl items-center justify-center py-8">
+              <BulkImageUpload
+                type="EXPORT"
+                onClose={() => setShowBulkImages(false)}
+                onComplete={loadProducts}
+              />
+            </div>
+          </div>
+        )}
 
         {/* ALERTS */}
 
